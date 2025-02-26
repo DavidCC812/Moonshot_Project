@@ -34,4 +34,8 @@ fun AppNavigator() {
         composable("welcome") {
             WelcomeScreen(navController)
         }
+        composable("email") {
+            EmailScreen(navController)
+        }
   }  
+}  
