@@ -2,7 +2,6 @@ package com.example.frontend.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,8 +14,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.frontend.components.BackButton
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.CustomInputField
+import androidx.compose.ui.platform.LocalConfiguration
 
 @Composable
 fun ForgotAccountScreen(navController: NavHostController) {
@@ -24,12 +25,23 @@ fun ForgotAccountScreen(navController: NavHostController) {
     var emailError by remember { mutableStateOf("") }
     var isSubmitted by remember { mutableStateOf(false) }
 
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+
+    // Adaptive font sizes
+    val titleFontSize = if (screenWidthDp > 600) 32.sp else 28.sp
+    val descriptionFontSize = if (screenWidthDp > 600) 20.sp else 16.sp
+    val inputFontSize = if (screenWidthDp > 600) 18.sp else 16.sp
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color(0xFFD9EAFD),
+                        Color(0xFFBCCCDC)
+                    )
                 )
             )
             .padding(horizontal = 24.dp),
@@ -37,37 +49,36 @@ fun ForgotAccountScreen(navController: NavHostController) {
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Logo
-            Text(
-                text = "App Logo",
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
+            // Top Section
+            Spacer(modifier = Modifier.height(16.dp))
+            BackButton(navController)
 
-            // Heading
+            Spacer(modifier = Modifier.weight(0.5f))
+
+            // Title
             Text(
                 text = "Recover Your Account",
-                fontSize = 22.sp,
+                fontSize = titleFontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = Color.Black,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 12.dp)
             )
 
             // Description
             Text(
                 text = "Enter your email address associated with your account, and we will send you a recovery link to regain access.",
-                fontSize = 16.sp,
-                color = Color.White.copy(alpha = 0.85f),
+                fontSize = descriptionFontSize,
+                color = Color.Black.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 28.dp)
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(bottom = 24.dp)
             )
+
+            Spacer(modifier = Modifier.weight(0.3f))
 
             // Email Input Field
             CustomInputField(
@@ -80,11 +91,12 @@ fun ForgotAccountScreen(navController: NavHostController) {
                 isError = emailError.isNotEmpty(),
                 keyboardType = KeyboardType.Email,
                 backgroundAlpha = 0.2f,
-                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
+                textStyle = LocalTextStyle.current.copy(fontSize = inputFontSize)
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // Error Message
             if (emailError.isNotEmpty()) {
                 Text(
                     text = emailError,
@@ -93,14 +105,13 @@ fun ForgotAccountScreen(navController: NavHostController) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 6.dp, bottom = 10.dp),
+                        .padding(top = 4.dp),
                     textAlign = TextAlign.Start
                 )
-            } else {
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // Send Recovery Email Button
+            // Button
+            Spacer(modifier = Modifier.height(24.dp))
             CustomButton(
                 text = "Send Recovery Email",
                 enabled = email.isNotEmpty(),
@@ -113,19 +124,9 @@ fun ForgotAccountScreen(navController: NavHostController) {
                         isSubmitted = true
                     }
                 },
-                elevation = ButtonDefaults.elevation(if (email.isNotEmpty()) 6.dp else 2.dp)
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Cancel Button
-            CustomButton(
-                text = "Cancel",
-                enabled = true,
-                onClick = { navController.popBackStack() },
-                backgroundColor = Color(0xFFD9534F),
-                shape = RoundedCornerShape(16.dp)
-            )
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
