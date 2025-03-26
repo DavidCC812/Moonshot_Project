@@ -27,7 +27,11 @@ fun LoginWithPasswordScreen(navController: NavHostController, identifier: String
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color(0xFFD9EAFD),
+                        Color(0xFFBCCCDC)
+                    )
                 )
             )
             .padding(horizontal = 24.dp),
@@ -35,19 +39,22 @@ fun LoginWithPasswordScreen(navController: NavHostController, identifier: String
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "App Logo",
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
+            Spacer(modifier = Modifier.height(80.dp))
 
-            // Identifier Field (Email/Phone)
+            //App Logo
+            Box(
+                modifier = Modifier
+                    .size(160.dp)
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {
+            }
+
+            Spacer(modifier = Modifier.height(140.dp))
+
+            // Identifier Field
             CustomInputField(
                 value = identifier,
                 onValueChange = {},
@@ -56,12 +63,12 @@ fun LoginWithPasswordScreen(navController: NavHostController, identifier: String
                 keyboardType = KeyboardType.Text,
                 enabled = false,
                 backgroundAlpha = 0.25f,
-                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
+                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp, color = Color.Black)
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // ✅ Password Input Field with Eye Toggle
+            // Password Input Field
             CustomInputField(
                 value = password,
                 onValueChange = {
@@ -72,7 +79,7 @@ fun LoginWithPasswordScreen(navController: NavHostController, identifier: String
                 isError = passwordError.isNotEmpty(),
                 keyboardType = KeyboardType.Password,
                 backgroundAlpha = 0.2f,
-                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
+                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp, color = Color.Black)
             )
 
             if (passwordError.isNotEmpty()) {
@@ -87,35 +94,37 @@ fun LoginWithPasswordScreen(navController: NavHostController, identifier: String
                     textAlign = TextAlign.Start
                 )
             } else {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(5.dp))
             }
 
+            // Forgot Password
             TextButton(
                 onClick = { navController.navigate("forgot_password") },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(
                     text = "Forgot your password?",
-                    fontSize = 14.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color.Black
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Continue Button
             CustomButton(
                 text = "Continue",
                 enabled = password.isNotEmpty(),
+                backgroundColor = if (password.isNotEmpty()) Color(0xFFB0BBC6) else Color(0xFFBCCCDC),
+                textColor = Color.Black,
                 onClick = {
                     if (password.isBlank()) {
                         passwordError = "Password is required"
                     } else {
                         navController.navigate("home")
                     }
-                },
-                disabledBackgroundAlpha = 0.5f
+                }
             )
         }
     }
