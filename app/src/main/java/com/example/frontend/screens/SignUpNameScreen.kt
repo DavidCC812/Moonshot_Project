@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.CustomInputField
+import com.example.frontend.components.SignUpProgressBar
 
 @Composable
 fun SignUpNameScreen(navController: NavHostController) {
@@ -28,7 +29,11 @@ fun SignUpNameScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color(0xFFD9EAFD),
+                        Color(0xFFBCCCDC)
+                    )
                 )
             )
             .padding(horizontal = 24.dp),
@@ -36,39 +41,25 @@ fun SignUpNameScreen(navController: NavHostController) {
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Logo
-            Text(
-                text = "App Logo",
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
+            // Progress Bar
+            Spacer(modifier = Modifier.height(20.dp))
+            SignUpProgressBar(currentStep = 1, totalSteps = 6)
 
             // Title
+            Spacer(modifier = Modifier.weight(0.5f))
             Text(
-                text = "Create Your Profile",
-                fontSize = 22.sp,
+                text = "Enter Your Name",
+                fontSize = 35.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = Color.Black,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            // Description
-            Text(
-                text = "Enter your full name and choose a nickname. Your nickname will be used in the forum to keep your identity private.",
-                fontSize = 16.sp,
-                color = Color.White.copy(alpha = 0.85f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 28.dp)
-            )
-
-            // Full Name Input Field
+            // Inputs & Button
+            Spacer(modifier = Modifier.weight(0.4f))
             CustomInputField(
                 value = fullName,
                 onValueChange = {
@@ -97,7 +88,6 @@ fun SignUpNameScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Nickname Input Field
             CustomInputField(
                 value = nickname,
                 onValueChange = { nickname = it },
@@ -108,9 +98,7 @@ fun SignUpNameScreen(navController: NavHostController) {
                 textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
             )
 
-            Spacer(modifier = Modifier.height(38.dp))
-
-            // Next Button
+            Spacer(modifier = Modifier.height(20.dp))
             CustomButton(
                 text = "Next",
                 enabled = fullName.isNotBlank(),
@@ -118,15 +106,7 @@ fun SignUpNameScreen(navController: NavHostController) {
                 fontWeight = if (fullName.isNotBlank()) FontWeight.Bold else FontWeight.Medium
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Back Button
-            CustomButton(
-                text = "Back",
-                enabled = true,
-                onClick = { navController.popBackStack() },
-                backgroundColor = Color(0xFF999999)
-            )
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
