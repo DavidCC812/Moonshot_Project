@@ -9,13 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
-import com.example.frontend.components.CustomInputField
+import com.example.frontend.components.PhoneInputField
 
 @Composable
 fun PhoneScreen(navController: NavHostController) {
@@ -49,27 +48,25 @@ fun PhoneScreen(navController: NavHostController) {
                 .padding(top = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // **App Logo Placeholder
+            // App Logo
             Box(
                 modifier = Modifier
                     .size(160.dp)
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
-            ) {
-            }
+            ) {}
 
             Spacer(modifier = Modifier.height(210.dp))
 
-            CustomInputField(
+            // Phone Input Field
+            PhoneInputField(
                 value = phone,
                 onValueChange = {
                     phone = it
                     phoneError = ""
                 },
                 label = "Enter your phone number",
-                isError = phoneError.isNotEmpty(),
-                keyboardType = KeyboardType.Phone,
-                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp, color = Color.Black)
+                isError = phoneError.isNotEmpty()
             )
 
             if (phoneError.isNotEmpty()) {
@@ -87,6 +84,7 @@ fun PhoneScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
+            // Continue Button
             CustomButton(
                 text = "Continue",
                 enabled = phone.isNotEmpty(),
@@ -99,13 +97,12 @@ fun PhoneScreen(navController: NavHostController) {
                         if (registeredPhones.contains(phone)) {
                             navController.navigate("login_with_password/$phone")
                         } else {
-                            navController.navigate("signup_name")
+                            navController.navigate("otp_verification/phone/$phone")
                         }
                     }
                 }
             )
             Spacer(modifier = Modifier.height(50.dp))
-
         }
     }
 }
