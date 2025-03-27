@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,26 +32,33 @@ fun EmailScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color(0xFFD9EAFD),
+                        Color(0xFFBCCCDC)
+                    )
                 )
             )
             .padding(horizontal = 24.dp),
         color = Color.Transparent
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "App Logo",
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
+            // App Logo
+            Box(
+                modifier = Modifier
+                    .size(160.dp)
+                    .background(Color.LightGray),
+                contentAlignment = Alignment.Center
+            ) {}
 
+            Spacer(modifier = Modifier.height(210.dp))
+
+            // Input Field
             CustomInputField(
                 value = email,
                 onValueChange = {
@@ -62,7 +68,7 @@ fun EmailScreen(navController: NavHostController) {
                 label = "Enter your email",
                 isError = emailError.isNotEmpty(),
                 keyboardType = KeyboardType.Email,
-                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
+                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp, color = Color.Black)
             )
 
             if (emailError.isNotEmpty()) {
@@ -70,16 +76,16 @@ fun EmailScreen(navController: NavHostController) {
                     text = emailError,
                     color = Color.Red,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 6.dp, bottom = 10.dp),
                     textAlign = TextAlign.Start
                 )
             } else {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
+            // Continue Button
             CustomButton(
                 text = "Continue",
                 enabled = email.isNotEmpty(),
@@ -92,11 +98,12 @@ fun EmailScreen(navController: NavHostController) {
                         if (registeredEmails.contains(email)) {
                             navController.navigate("login_with_password/$email")
                         } else {
-                            navController.navigate("signup_name")
+                            navController.navigate("otp_verification/email/$email")
                         }
                     }
                 }
             )
+            Spacer(modifier = Modifier.height(50.dp))
         }
     }
 }
