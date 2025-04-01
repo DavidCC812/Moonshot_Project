@@ -14,8 +14,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.frontend.components.BackButton
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.CustomInputField
+import com.example.frontend.components.SignUpProgressBar
 
 @Composable
 fun SignUpPasswordScreen(navController: NavHostController) {
@@ -28,7 +30,11 @@ fun SignUpPasswordScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color(0xFFD9EAFD),
+                        Color(0xFFBCCCDC)
+                    )
                 )
             )
             .padding(horizontal = 24.dp),
@@ -36,38 +42,25 @@ fun SignUpPasswordScreen(navController: NavHostController) {
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Logo
-            Text(
-                text = "App Logo",
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
+            // Progress Bar
+            Spacer(modifier = Modifier.height(20.dp))
+            SignUpProgressBar(currentStep = 3, totalSteps = 6)
+            BackButton(navController)
 
             // Title
+            Spacer(modifier = Modifier.weight(0.5f))
             Text(
                 text = "Create Your Password",
-                fontSize = 22.sp,
+                fontSize = 35.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = Color.Black,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            // Description
-            Text(
-                text = "Choose a strong password. It must be at least 6 characters long and contain at least one number.",
-                fontSize = 16.sp,
-                color = Color.White.copy(alpha = 0.85f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 28.dp)
-            )
-
+            Spacer(modifier = Modifier.weight(0.4f))
             // Password Input Field
             CustomInputField(
                 value = password,
@@ -117,9 +110,8 @@ fun SignUpPasswordScreen(navController: NavHostController) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(38.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Next Button
             CustomButton(
                 text = "Next",
                 enabled = password.length >= 6 && password.any { it.isDigit() } && password == confirmPassword,
@@ -132,15 +124,7 @@ fun SignUpPasswordScreen(navController: NavHostController) {
                 fontWeight = if (password.length >= 6 && password.any { it.isDigit() } && password == confirmPassword) FontWeight.Bold else FontWeight.Medium
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Back Button
-            CustomButton(
-                text = "Back",
-                enabled = true,
-                onClick = { navController.popBackStack() },
-                backgroundColor = Color(0xFF999999)
-            )
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
