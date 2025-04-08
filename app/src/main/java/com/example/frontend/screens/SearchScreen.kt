@@ -4,30 +4,31 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.frontend.components.CustomButton
+import com.example.frontend.components.SearchBar
+import com.example.frontend.components.SearchDestinationCard
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun SearchScreen(navController: NavHostController, viewModel: SavedItinerariesViewModel) {
     var selectedFilter by remember { mutableStateOf("All") }
-    val accessibilityFilters = listOf("All", "Wheelchair Accessible", "Braille Available", "Hearing Aid")
+    var searchQuery by remember { mutableStateOf("") }
+    var dateRange by remember { mutableStateOf(getCurrentDateRange()) }
+    var searchTriggered by remember { mutableStateOf(false) }
+
+    val accessibilityFilters =
+        listOf("All", "Wheelchair Accessible", "Braille Available", "Hearing Aid")
 
     Scaffold(
-        topBar = { HomeTopBar() },
+        topBar = { HomeTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "search") }
     ) { padding ->
         Surface(
@@ -35,7 +36,11 @@ fun SearchScreen(navController: NavHostController, viewModel: SavedItinerariesVi
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                        colors = listOf(
+                            Color(0xFFF8FAFC),
+                            Color(0xFFD9EAFD),
+                            Color(0xFFBCCCDC)
+                        )
                     )
                 )
                 .padding(horizontal = 16.dp),
@@ -49,92 +54,52 @@ fun SearchScreen(navController: NavHostController, viewModel: SavedItinerariesVi
                 Text(
                     text = "Search Destinations",
                     fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = Color.Black,
                     modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
                 )
 
                 SearchBar(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
                     selectedFilter = selectedFilter,
                     onFilterChange = { selectedFilter = it },
-                    accessibilityFilters = accessibilityFilters
+                    accessibilityFilters = accessibilityFilters,
+                    selectedDates = dateRange,
+                    onDateChange = { dateRange = it },
+                    onSearch = { searchTriggered = true }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                SearchResults(selectedFilter, viewModel, navController)
+                if (searchTriggered) {
+                    SearchResultsList(
+                        searchQuery,
+                        selectedFilter,
+                        dateRange,
+                        viewModel,
+                        navController
+                    )
+                } else {
+                    Text(
+                        text = "Use the search bar to find destinations.",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun SearchBar(
+fun SearchResultsList(
+    searchQuery: String,
     selectedFilter: String,
-    onFilterChange: (String) -> Unit,
-    accessibilityFilters: List<String>,
+    dateRange: String,
+    viewModel: SavedItinerariesViewModel,
+    navController: NavHostController
 ) {
-    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
-    var expanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.2f))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_search),
-            contentDescription = "Search Icon",
-            tint = Color.White,
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        BasicTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.weight(1f),
-            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp, color = Color.White),
-            singleLine = true,
-            decorationBox = { innerTextField ->
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    if (searchQuery.text.isEmpty()) {
-                        Text("Search destinations...", fontSize = 16.sp, color = Color.White.copy(alpha = 0.6f))
-                    }
-                    innerTextField()
-                }
-            }
-        )
-
-        Box {
-            IconButton(onClick = { expanded = true }) {
-                Icon(
-                    painter = painterResource(id = android.R.drawable.ic_menu_sort_by_size),
-                    contentDescription = "Filter",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                accessibilityFilters.forEach { filter ->
-                    DropdownMenuItem(onClick = {
-                        onFilterChange(filter)
-                        expanded = false
-                    }) {
-                        Text(filter)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun SearchResults(selectedFilter: String, viewModel: SavedItinerariesViewModel, navController: NavHostController) {
     val allDestinations = listOf(
         "Eiffel Tower" to listOf("Wheelchair Accessible", "Elevator"),
         "Louvre Museum" to listOf("Wheelchair Accessible", "Braille Available"),
@@ -143,56 +108,28 @@ fun SearchResults(selectedFilter: String, viewModel: SavedItinerariesViewModel, 
         "Orsay Museum" to listOf("Wheelchair Accessible", "Braille Available", "Hearing Aid")
     )
 
-    val filteredDestinations = if (selectedFilter == "All") {
-        allDestinations
-    } else {
-        allDestinations.filter { it.second.contains(selectedFilter) }
-    }
+    val filteredDestinations = allDestinations
+        .filter { it.first.contains(searchQuery, ignoreCase = true) }
+        .filter { selectedFilter == "All" || it.second.contains(selectedFilter) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(filteredDestinations) { (name, tags) ->
-            SearchDestinationCard(name, tags, viewModel, navController)
+            SearchDestinationCard(
+                name = name,
+                rating = 4.5,
+                price = "30",
+                duration = "2 hours",
+                people = 2,
+                accessibilityFeatures = tags,
+                navController = navController
+            )
         }
     }
 }
 
-@Composable
-fun SearchDestinationCard(
-    name: String,
-    tags: List<String>,
-    viewModel: SavedItinerariesViewModel,
-    navController: NavHostController
-) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-
-            tags.forEach { tag ->
-                Text(text = "• $tag", fontSize = 14.sp, color = Color.DarkGray)
-            }
-
-            CustomButton(
-                text = "View Itinerary",
-                onClick = { navController.navigate("itinerary_details/$name/Next Stop Placeholder") },
-                buttonHeight = 45.dp,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            CustomButton(
-                text = "Save",
-                onClick = { viewModel.saveItinerary(name) },
-                buttonHeight = 45.dp,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
+fun getCurrentDateRange(): String {
+    val sdf = SimpleDateFormat("MMM dd", Locale.getDefault())
+    val today = sdf.format(Date())
+    val nextWeek = sdf.format(Calendar.getInstance().apply { add(Calendar.DATE, 7) }.time)
+    return "$today - $nextWeek"
 }
