@@ -8,9 +8,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,23 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
-import com.example.frontend.components.DiscussionCard
 import com.example.frontend.components.RecommendedDestinationCard
+import com.example.frontend.components.NotificationBadge
 
 @Composable
 fun HomeScreen(navController: NavHostController, viewModel: SavedItinerariesViewModel) {
     Scaffold(
-        topBar = { HomeTopBar() },
+        topBar = { HomeTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "home") },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate("notifications") },
-                backgroundColor = Color(0xFF3A6EA5),
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
-            }
-        },
         backgroundColor = Color.Transparent
     ) { padding ->
         Surface(
@@ -46,7 +38,11 @@ fun HomeScreen(navController: NavHostController, viewModel: SavedItinerariesView
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                        colors = listOf(
+                            Color(0xFFF8FAFC),
+                            Color(0xFFD9EAFD),
+                            Color(0xFFBCCCDC)
+                        )
                     )
                 )
                 .padding(horizontal = 24.dp),
@@ -58,55 +54,66 @@ fun HomeScreen(navController: NavHostController, viewModel: SavedItinerariesView
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
             ) {
-                RecommendedDestinationsSection(viewModel)
+
+                NextPlanSection(navController, viewModel)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TrendingDestinationsSection(navController)
 
+                RecommendedDestinationsSection(navController)
                 Spacer(modifier = Modifier.height(24.dp))
 
-                CustomButton(
-                    text = "View More",
-                    onClick = { navController.navigate("search") },
-                    backgroundColor = Color(0xFF3A6EA5),
-                    textColor = Color.White,
-                    buttonHeight = 50.dp,
-                    modifier = Modifier
-                        .fillMaxWidth(0.85f)
-                        .align(Alignment.CenterHorizontally)
-                )
-
-                Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }
 }
 
+
 @Composable
-fun HomeTopBar() {
+fun HomeTopBar(navController: NavHostController) {
     TopAppBar(
-        backgroundColor = Color(0xFF2A5D9F),
+        backgroundColor = Color(0xFF9AA6B2),
         elevation = 4.dp,
         modifier = Modifier.height(56.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            contentAlignment = Alignment.Center
         ) {
+            // App Logo
             Text(
                 text = "App Logo",
                 fontSize = 18.sp,
-                color = Color.White
+                color = Color.Black
             )
+
+            // Notifications Icon
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(
+                    onClick = { navController.navigate("notifications") }
+                ) {
+                    Box(contentAlignment = Alignment.TopEnd) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            contentDescription = "Notifications",
+                            tint = Color.Black,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        NotificationBadge(count = 1)
+                    }
+                }
+            }
         }
     }
 }
 
+
 @Composable
 fun BottomNavBar(navController: NavHostController, selectedScreen: String) {
     BottomAppBar(
-        backgroundColor = Color(0xFF2A5D9F),
+        backgroundColor = Color(0xFF9AA6B2),
         elevation = 8.dp,
         modifier = Modifier.height(60.dp)
     ) {
@@ -128,9 +135,9 @@ fun BottomNavBar(navController: NavHostController, selectedScreen: String) {
             )
 
             BottomNavButton(
-                iconResId = android.R.drawable.ic_menu_myplaces,
+                icon = Icons.Filled.Bookmark,
                 selected = selectedScreen == "itinerary",
-                onClick = { navController.navigate("itinerary_planner") }
+                onClick = { navController.navigate("saved_itineraries") }
             )
             BottomNavButton(
                 icon = Icons.Filled.Person,
@@ -153,14 +160,14 @@ fun BottomNavButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (selected) Color.White else Color.Gray,
+                tint = if (selected) Color.Black else Color(0xFF5F6B78),
                 modifier = Modifier.size(32.dp)
             )
         } else if (iconResId != null) {
             Icon(
                 painter = painterResource(id = iconResId),
                 contentDescription = null,
-                tint = if (selected) Color.White else Color.Gray,
+                tint = if (selected) Color.Black else Color(0xFF5F6B78),
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -168,15 +175,66 @@ fun BottomNavButton(
 }
 
 @Composable
-fun RecommendedDestinationsSection(viewModel: SavedItinerariesViewModel) {
+fun NextPlanSection(navController: NavHostController, viewModel: SavedItinerariesViewModel) {
+    val nextPlan = viewModel.nextPlan.value
+
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Next Plan",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+        if (nextPlan == null) {
+            Text(
+                text = "You have no reserved plans yet.",
+                fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            CustomButton(
+                text = "Find Itineraries",
+                onClick = { navController.navigate("search") },
+                backgroundColor = Color(0xFF9AA6B2),
+                textColor = Color.Black,
+                buttonHeight = 40.dp,
+                modifier = Modifier.fillMaxWidth(0.85f)
+            )
+        } else {
+            RecommendedDestinationCard(
+                title = nextPlan.first,
+                location = nextPlan.second,
+                rating = 4.5,
+                price = "30",
+                duration = "2 hours",
+                people = 2,
+                accessibilityFeatures = listOf("Wheelchair Accessible", "Braille Available"),
+                onClick = { navController.navigate("itinerary_details/${nextPlan.first}/none") }
+            )
+        }
+    }
+}
+
+@Composable
+fun RecommendedDestinationsSection(navController: NavHostController) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
     ) {
         Text(
             text = "Recommended Destinations",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = Color.Black,
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
@@ -185,49 +243,28 @@ fun RecommendedDestinationsSection(viewModel: SavedItinerariesViewModel) {
             contentPadding = PaddingValues(start = 4.dp, end = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val destinations = listOf(
-                "Louvre Museum" to listOf("Wheelchair Accessible", "Braille Available"),
-                "Orsay Museum" to listOf("Wheelchair Accessible", "Braille Available", "Hearing aid"),
-                "Eiffel Tower" to listOf("Wheelchair Accessible", "Guided Tours")
+            val recommendedDestinations = listOf(
+                Triple("Louvre Museum", "Paris, France", 4.8) to "25",
+                Triple("Orsay Museum", "Paris, France", 4.6) to "20",
+                Triple("Eiffel Tower", "Paris, France", 4.9) to "30",
+                Triple("Notre-Dame Cathedral", "Paris, France", 4.7) to "22",
+                Triple("Arc de Triomphe", "Paris, France", 4.8) to "18",
+                Triple("Palace of Versailles", "Paris, France", 4.9) to "35"
             )
 
-            items(destinations) { (name, badges) ->
+            items(recommendedDestinations) { (info, price) ->
+                val (name, location, rating) = info
                 RecommendedDestinationCard(
                     title = name,
-                    accessibilityFeatures = badges,
-                    onSaveClick = { viewModel.saveItinerary(name) }
+                    location = location,
+                    rating = rating,
+                    price = price,
+                    duration = "2 hours",
+                    people = 2,
+                    accessibilityFeatures = listOf("Wheelchair Accessible", "Braille Available"),
+                    onClick = { navController.navigate("itinerary_details/$name/none") }
                 )
             }
         }
-    }
-}
-
-
-@Composable
-fun TrendingDestinationsSection(navController: NavHostController) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-        Text(
-            text = "Trending Destinations",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        val trendingDestinations = listOf(
-            "Eiffel Tower" to "Wheelchair Accessible - Guided Tours",
-            "Arc de Triomphe" to "Audio Assistance - Elevator Access",
-            "Notre-Dame Cathedral" to "Braille Signs - Hearing Aid Support"
-        )
-
-        for ((title, features) in trendingDestinations) {
-            DiscussionCard(
-                title = title,
-                authorComments = features,
-                onJoinClick = { navController.navigate("search") }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
