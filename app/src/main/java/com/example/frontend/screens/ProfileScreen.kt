@@ -19,14 +19,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import com.example.frontend.components.NotificationBadge
 
 @Composable
 fun ProfileScreen(navController: NavHostController, profileViewModel: ProfileViewModel) {
     Scaffold(
-        topBar = { HomeTopBar() },
+        topBar = { ProfileTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "profile") }
     ) { padding ->
         Surface(
@@ -34,7 +34,11 @@ fun ProfileScreen(navController: NavHostController, profileViewModel: ProfileVie
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                        colors = listOf(
+                            Color(0xFFF8FAFC),
+                            Color(0xFFD9EAFD),
+                            Color(0xFFBCCCDC)
+                        )
                     )
                 )
                 .padding(padding)
@@ -49,10 +53,77 @@ fun ProfileScreen(navController: NavHostController, profileViewModel: ProfileVie
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ProfileHeader(profileViewModel)
-                AccountDetails(profileViewModel)
-                ActivitySection(navController)
-                SettingsSection(navController)
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = 6.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    backgroundColor = Color.White
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        AccountDetails(profileViewModel)
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        ActivitySection(navController)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 LogoutButton(navController)
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileTopBar(navController: NavHostController) {
+    TopAppBar(
+        backgroundColor = Color(0xFF9AA6B2),
+        elevation = 4.dp,
+        modifier = Modifier.height(56.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                text = "App Logo",
+                fontSize = 18.sp,
+                color = Color.Black,
+                modifier = Modifier.weight(1f)
+            )
+
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Notifications Icon
+                IconButton(onClick = { navController.navigate("notifications") }) {
+                    Box(contentAlignment = Alignment.TopEnd) {
+                        Icon(
+                            imageVector = Icons.Filled.Notifications,
+                            contentDescription = "Notifications",
+                            tint = Color.Black,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        NotificationBadge(count = 1)
+                    }
+                }
+
+                // Settings Icon
+                IconButton(onClick = { navController.navigate("settings") }) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Settings",
+                        tint = Color.Black,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         }
     }
@@ -75,54 +146,63 @@ fun ProfileHeader(profileViewModel: ProfileViewModel) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text(text = profileViewModel.name.value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(
+            text = profileViewModel.name.value,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
         Text(text = "Traveler & Explorer", fontSize = 14.sp, color = Color.LightGray)
     }
 }
 
 @Composable
 fun AccountDetails(profileViewModel: ProfileViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(Color.White, RoundedCornerShape(12.dp))
-            .padding(16.dp)
-    ) {
-        Text("Account Information", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            "Account Information",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ProfileInfoItem("Email", profileViewModel.email.value)
-        ProfileInfoItem("Phone", profileViewModel.phone.value)
-        ProfileInfoItem("Accessibility Preferences", profileViewModel.accessibility.value)
+        val profileItems = listOf(
+            "Email" to profileViewModel.email.value,
+            "Phone" to profileViewModel.phone.value,
+            "Accessibility Preferences" to profileViewModel.accessibility.value
+        )
+
+        profileItems.forEachIndexed { index, (label, value) ->
+            ProfileInfoItem(label, value, showDivider = index < profileItems.lastIndex)
+        }
     }
 }
 
 @Composable
-fun ProfileInfoItem(label: String, value: String) {
+fun ProfileInfoItem(label: String, value: String, showDivider: Boolean) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
         Text(text = label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
         Text(text = value, fontSize = 16.sp, color = Color.Black)
-        Divider(modifier = Modifier.padding(vertical = 4.dp), thickness = 1.dp, color = Color.LightGray)
+        if (showDivider) {
+            Divider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                thickness = 1.dp,
+                color = Color.LightGray
+            )
+        }
     }
 }
 
 @Composable
 fun ActivitySection(navController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(Color.White, RoundedCornerShape(12.dp))
-            .padding(16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text("My Activity", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ActivityItem("Saved Itineraries", onClick = { navController.navigate("saved_itineraries") })
-        ActivityItem("Reviews", onClick = { navController.navigate("my_reviews")})
+        ActivityItem("Reviews", onClick = { navController.navigate("my_reviews") })
     }
 }
 
@@ -130,52 +210,16 @@ fun ActivitySection(navController: NavHostController) {
 fun ActivityItem(title: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF3A6EA5), contentColor = Color.White)
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color(0xFF9AA6B2),
+            contentColor = Color.Black
+        )
     ) {
         Text(title, fontSize = 16.sp)
-    }
-}
-
-@Composable
-fun SettingsSection(navController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(Color.White, RoundedCornerShape(12.dp))
-            .padding(16.dp)
-    ) {
-        Text("Settings", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        SettingsItem(Icons.Filled.Edit, "Edit Profile") { navController.navigate("edit_profile") }
-        SettingsItem(Icons.Filled.Notifications, "Notifications") { navController.navigate("notifications") }
-        SettingsItem(Icons.Filled.Person, "Privacy Settings") { navController.navigate("privacy_settings") }
-    }
-}
-
-@Composable
-fun SettingsItem(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFEFEFEF), RoundedCornerShape(12.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(imageVector = icon, contentDescription = title, tint = Color(0xFF3A6EA5), modifier = Modifier.size(24.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        Button(
-            onClick = onClick,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF673AB7), contentColor = Color.White)
-        ) {
-            Text("Go")
-        }
     }
 }
 
@@ -185,12 +229,20 @@ fun LogoutButton(navController: NavHostController) {
         onClick = { navController.navigate("welcome") },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .height(45.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White)
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Red,
+            contentColor = Color.White
+        )
     ) {
-        Icon(imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout", modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text("Logout", fontSize = 16.sp)
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+            contentDescription = "Logout",
+            modifier = Modifier.size(28.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text("Logout", fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }
 }
