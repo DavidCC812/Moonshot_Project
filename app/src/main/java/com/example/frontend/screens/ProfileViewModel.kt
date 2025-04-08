@@ -9,7 +9,12 @@ class ProfileViewModel : ViewModel() {
     var phone = mutableStateOf("+123 456 789")
     var accessibility = mutableStateOf("Wheelchair Accessible")
 
-    fun updateProfile(newName: String, newEmail: String, newPhone: String, newAccessibility: String) {
+    fun updateProfile(
+        newName: String,
+        newEmail: String,
+        newPhone: String,
+        newAccessibility: String
+    ) {
         name.value = newName
         email.value = newEmail
         phone.value = newPhone
