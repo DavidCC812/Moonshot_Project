@@ -1,51 +1,62 @@
 package com.example.frontend.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalConfiguration
+import com.example.frontend.components.BackButton
 
 @Composable
 fun PrivacyPolicyScreen(navController: NavHostController) {
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+
+    // Adaptive font sizes
+    val titleFontSize = if (screenWidthDp > 600) 32.sp else 28.sp
+    val contentFontSize = if (screenWidthDp > 600) 18.sp else 16.sp
+
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color(0xFFD9EAFD),
+                        Color(0xFFBCCCDC)
+                    )
+                )
+            )
+            .padding(horizontal = 24.dp),
+        color = Color.Transparent
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(48.dp))
+            BackButton(navController)
 
-            // App Logo Placeholder
-            Text(
-                text = "App Logo",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
+            // Title
             Text(
                 text = "Privacy Policy",
-                fontSize = 22.sp,
+                fontSize = titleFontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color.DarkGray
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -54,7 +65,7 @@ fun PrivacyPolicyScreen(navController: NavHostController) {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
@@ -69,25 +80,12 @@ fun PrivacyPolicyScreen(navController: NavHostController) {
                         
                         For further details, please contact our support team.
                     """.trimIndent(),
-                    fontSize = 16.sp,
-                    color = Color.DarkGray,
+                    fontSize = contentFontSize,
+                    color = Color.Black.copy(alpha = 0.85f),
                     lineHeight = 22.sp
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Back Button
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF3A6EA5), contentColor = Color.White)
-            ) {
-                Text("Back", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
