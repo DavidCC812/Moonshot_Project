@@ -1,13 +1,14 @@
 package com.example.frontend.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -15,6 +16,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.frontend.components.BackButton
+import com.example.frontend.components.CustomButton
+import com.example.frontend.components.CustomInputField
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -31,80 +35,155 @@ fun ChangePasswordScreen(navController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     var successMessage by remember { mutableStateOf<String?>(null) }
 
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+
+    // Adaptive font sizes
+    val titleFontSize = if (screenWidthDp > 600) 32.sp else 28.sp
+    val descriptionFontSize = if (screenWidthDp > 600) 20.sp else 16.sp
+    val inputFontSize = if (screenWidthDp > 600) 18.sp else 16.sp
+
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFF8FAFC),
+                        Color(0xFFD9EAFD),
+                        Color(0xFFBCCCDC)
+                    )
+                )
+            )
+            .padding(horizontal = 24.dp),
+        color = Color.Transparent
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            BackButton(navController)
 
-            // App Logo Placeholder
-            Text(
-                text = "App Logo",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+            Spacer(modifier = Modifier.weight(0.5f))
 
-            Spacer(modifier = Modifier.height(48.dp))
-
+            // Title
             Text(
                 text = "Change Your Password",
-                fontSize = 22.sp,
+                fontSize = titleFontSize,
                 fontWeight = FontWeight.Bold,
-                color = Color.DarkGray
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // Description
             Text(
                 text = "Enter your current password and set a new one.",
-                fontSize = 16.sp,
-                color = Color.Gray,
+                fontSize = descriptionFontSize,
+                color = Color.Black.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(bottom = 24.dp)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.weight(0.3f))
 
             // Input Fields
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                PasswordInputField(
-                    label = "Enter current password",
-                    password = oldPassword,
-                    onPasswordChange = { oldPassword = it; oldPasswordError = "" },
-                    errorText = oldPasswordError
-                )
+            CustomInputField(
+                value = oldPassword,
+                onValueChange = {
+                    oldPassword = it
+                    oldPasswordError = ""
+                },
+                label = "Enter current password",
+                isError = oldPasswordError.isNotEmpty(),
+                keyboardType = KeyboardType.Password,
+                visualTransformation = PasswordVisualTransformation(),
+                backgroundAlpha = 0.2f,
+                textStyle = LocalTextStyle.current.copy(fontSize = inputFontSize)
+            )
 
-                PasswordInputField(
-                    label = "Enter new password",
-                    password = newPassword,
-                    onPasswordChange = { newPassword = it; newPasswordError = "" },
-                    errorText = newPasswordError
-                )
+            Spacer(modifier = Modifier.height(16.dp))
 
-                PasswordInputField(
-                    label = "Confirm new password",
-                    password = confirmPassword,
-                    onPasswordChange = { confirmPassword = it; confirmPasswordError = "" },
-                    errorText = confirmPasswordError
+            CustomInputField(
+                value = newPassword,
+                onValueChange = {
+                    newPassword = it
+                    newPasswordError = ""
+                },
+                label = "Enter new password",
+                isError = newPasswordError.isNotEmpty(),
+                keyboardType = KeyboardType.Password,
+                visualTransformation = PasswordVisualTransformation(),
+                backgroundAlpha = 0.2f,
+                textStyle = LocalTextStyle.current.copy(fontSize = inputFontSize)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CustomInputField(
+                value = confirmPassword,
+                onValueChange = {
+                    confirmPassword = it
+                    confirmPasswordError = ""
+                },
+                label = "Confirm new password",
+                isError = confirmPasswordError.isNotEmpty(),
+                keyboardType = KeyboardType.Password,
+                visualTransformation = PasswordVisualTransformation(),
+                backgroundAlpha = 0.2f,
+                textStyle = LocalTextStyle.current.copy(fontSize = inputFontSize)
+            )
+
+            // Error Messages
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (oldPasswordError.isNotEmpty()) {
+                Text(
+                    text = oldPasswordError,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp),
+                    textAlign = TextAlign.Start
+                )
+            }
+
+            if (newPasswordError.isNotEmpty()) {
+                Text(
+                    text = newPasswordError,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp),
+                    textAlign = TextAlign.Start
+                )
+            }
+
+            if (confirmPasswordError.isNotEmpty()) {
+                Text(
+                    text = confirmPasswordError,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp),
+                    textAlign = TextAlign.Start
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Change Password Button
-            Button(
+            CustomButton(
+                text = "Change Password",
+                enabled = oldPassword.isNotEmpty() && newPassword.isNotEmpty() && confirmPassword.isNotEmpty(),
                 onClick = {
                     var isValid = true
 
@@ -132,78 +211,25 @@ fun ChangePasswordScreen(navController: NavHostController) {
                     if (isValid) {
                         successMessage = "Password changed successfully!"
                         coroutineScope.launch {
-                            delay(2000) // Simulate a success message
-                            navController.popBackStack() // Go back to Privacy Settings
+                            delay(2000)
+                            navController.popBackStack()
                         }
-                        // TODO: Implement actual password change logic in backend
                     }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF3A6EA5), contentColor = Color.White)
-            ) {
-                Text("Change Password", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
+                }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             successMessage?.let {
                 Text(
                     it,
-                    color = Color(0xFF3A6EA5),
+                    color = Color.Black,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Cancel Button
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier.width(150.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD9534F), contentColor = Color.White)
-            ) {
-                Text("Cancel", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
-@Composable
-fun PasswordInputField(
-    label: String,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    errorText: String
-) {
-    Column {
-        OutlinedTextField(
-            value = password,
-            onValueChange = onPasswordChange,
-            label = { Text(label, color = Color.DarkGray) },
-            isError = errorText.isNotEmpty(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color(0xFF3A6EA5),
-                unfocusedBorderColor = Color(0xFF3A6EA5),
-                textColor = Color.DarkGray,
-                cursorColor = Color(0xFF3A6EA5),
-                errorBorderColor = Color.Red
-            ),
-            shape = RoundedCornerShape(8.dp)
-        )
-
-        if (errorText.isNotEmpty()) {
-            Text(
-                text = errorText,
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-            )
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
