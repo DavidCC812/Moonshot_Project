@@ -22,7 +22,7 @@ fun MyReviewsScreen(navController: NavHostController, myReviewsViewModel: MyRevi
     val myReviews by remember { mutableStateOf(myReviewsViewModel.myReviews) }
 
     Scaffold(
-        topBar = { HomeTopBar() },
+        topBar = { HomeTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "profile") },
         floatingActionButton = {
             FloatingActionButton(
@@ -30,7 +30,7 @@ fun MyReviewsScreen(navController: NavHostController, myReviewsViewModel: MyRevi
                     val defaultItinerary = "General Review"
                     navController.navigate("write_review/$defaultItinerary")
                 },
-                backgroundColor = Color(0xFF3A6EA5),
+                backgroundColor = Color(0xFF9AA6B2),
                 contentColor = Color.White
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "New Review")
@@ -43,7 +43,11 @@ fun MyReviewsScreen(navController: NavHostController, myReviewsViewModel: MyRevi
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                        colors = listOf(
+                            Color(0xFFF8FAFC),
+                            Color(0xFFD9EAFD),
+                            Color(0xFFBCCCDC)
+                        )
                     )
                 )
                 .padding(padding)
@@ -57,7 +61,7 @@ fun MyReviewsScreen(navController: NavHostController, myReviewsViewModel: MyRevi
                     "My Reviews",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = Color.Black,
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
 
@@ -66,7 +70,7 @@ fun MyReviewsScreen(navController: NavHostController, myReviewsViewModel: MyRevi
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No reviews yet!", fontSize = 16.sp, color = Color.White)
+                        Text("No reviews yet!", fontSize = 16.sp, color = Color.Gray)
                     }
                 } else {
                     LazyColumn(
