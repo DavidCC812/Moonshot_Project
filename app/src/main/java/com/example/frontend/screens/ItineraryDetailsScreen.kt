@@ -1,13 +1,17 @@
 package com.example.frontend.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -15,174 +19,266 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.compose.ui.text.buildAnnotatedString
+import kotlinx.coroutines.launch
 
 @Composable
-fun ItineraryDetailsScreen(navController: NavHostController, itineraryTitle: String) {
+fun ItineraryDetailsScreen(
+    navController: NavHostController,
+    itineraryTitle: String,
+    viewModel: SavedItinerariesViewModel
+) {
     var reviews by rememberSaveable {
         mutableStateOf(
             listOf(
-                Review("Alice Johnson", "January 5, 2024", 5, "Amazing experience!", itineraryTitle),
-                Review("Mark Smith", "December 20, 2023", 4, "Great itinerary, but could use more accessibility details.", itineraryTitle),
-                Review("Emily Brown", "December 10, 2023", 3, "Good, but some places were not as accessible as advertised.", itineraryTitle)
+                Review(
+                    "Alice Johnson",
+                    "January 5, 2024",
+                    5,
+                    "Amazing experience!",
+                    itineraryTitle
+                ),
+                Review(
+                    "Mark Smith",
+                    "December 20, 2023",
+                    4,
+                    "Great itinerary, but could use more accessibility details.",
+                    itineraryTitle
+                ),
+                Review(
+                    "Emily Brown",
+                    "December 10, 2023",
+                    3,
+                    "Good, but some places were not as accessible as advertised.",
+                    itineraryTitle
+                )
             )
         )
     }
 
-    val navBackStackEntry = navController.currentBackStackEntry
-    LaunchedEffect(navBackStackEntry) {
-        val newName = navBackStackEntry?.savedStateHandle?.get<String>("review_name")
-        val newDate = navBackStackEntry?.savedStateHandle?.get<String>("review_date")
-        val newRating = navBackStackEntry?.savedStateHandle?.get<Int>("review_rating")
-        val newText = navBackStackEntry?.savedStateHandle?.get<String>("review_text")
-
-        if (newName != null && newDate != null && newRating != null && newText != null) {
-            val newReview = Review(newName, newDate, newRating, newText, itineraryTitle)
-
-            if (!reviews.contains(newReview)) {
-                reviews = listOf(newReview) + reviews
-            }
-
-            // Avoid duplicate additions
-            navBackStackEntry.savedStateHandle.remove<String>("review_name")
-            navBackStackEntry.savedStateHandle.remove<String>("review_date")
-            navBackStackEntry.savedStateHandle.remove<Int>("review_rating")
-            navBackStackEntry.savedStateHandle.remove<String>("review_text")
-        }
-    }
+    val isSaved =
+        remember { mutableStateOf(viewModel.savedItineraries.any { it.first == itineraryTitle }) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = { HomeTopBar() },
-        bottomBar = { BottomNavBar(navController, selectedScreen = "search") }
+        topBar = { HomeTopBar(navController) },
+        bottomBar = { BottomNavBar(navController, selectedScreen = "search") },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                        colors = listOf(
+                            Color(0xFFF8FAFC),
+                            Color(0xFFD9EAFD),
+                            Color(0xFFBCCCDC)
+                        )
                     )
                 )
                 .padding(padding)
                 .padding(horizontal = 16.dp),
             color = Color.Transparent
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(16.dp)
-                ) {
-                    item {
-                        Column {
+                item {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
                                 text = itineraryTitle,
                                 fontSize = 26.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = Color.Black,
+                                modifier = Modifier.weight(1f)
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp)
-                                    .background(Color.LightGray),
-                                contentAlignment = Alignment.Center
+
+                            IconButton(
+                                onClick = {
+                                    if (isSaved.value) {
+                                        viewModel.removeItinerary(itineraryTitle to "Paris")
+                                        isSaved.value = false
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Removed from Saved Itineraries")
+                                        }
+                                    } else {
+                                        viewModel.saveItinerary(itineraryTitle to "Paris")
+                                        isSaved.value = true
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Saved to Itineraries")
+                                        }
+                                    }
+                                }
                             ) {
-                                Text("Map/Image Placeholder", fontSize = 16.sp, color = Color.Gray)
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Explore the beauty of $itineraryTitle with full accessibility support. Enjoy an experience with well-defined paths and the necessary accommodations.",
-                                fontSize = 16.sp,
-                                color = Color.White,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                        }
-                    }
-
-                    item { AccessibilityInfo() }
-                    item { GeneralInfoSection() }
-                    item { ItineraryStepsSection() }
-                    item { AlternativeRoutesSection() }
-
-                    item {
-                        Column(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
-                            Text(
-                                "Reviews",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-
-                            Button(
-                                onClick = { navController.navigate("write_review/$itineraryTitle") },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp)
-                                    .padding(vertical = 8.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = Color(0xFF3A6EA5),
-                                    contentColor = Color.White
+                                Icon(
+                                    imageVector = if (isSaved.value) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                    contentDescription = "Save Itinerary",
+                                    tint = Color.Black
                                 )
-                            ) {
-                                Icon(Icons.Filled.Star, contentDescription = "Write Review", tint = Color.White)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Write a Review", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                         }
-                    }
 
-                    items(reviews) { review ->
-                        ReviewCard(review, navController, showItineraryButton = false)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .background(Color.LightGray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Map/Image Placeholder", fontSize = 16.sp, color = Color.Gray)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = buildAnnotatedString {
+                                append("This itinerary lasts approximately ")
+                                boldText("2-3 hours")
+                                append(", offering a fully accessible experience. ")
+                                append("Visitors can rely on ")
+                                boldText("accessible taxis and metro services")
+                                append(" to reach key destinations. The itinerary also provides ")
+                                boldText("free cancellation")
+                                append(" up to ")
+                                boldText("24 hours before the trip")
+                                append(" if needed.\n\n")
+
+                                append("For those requiring additional accessibility options, ")
+                                boldText("alternative routes")
+                                append(" include a ")
+                                boldText("wheelchair-accessible pathway via Rue de Rivoli")
+                                append(", ")
+                                boldText("elevator access at the museum")
+                                append(", and ")
+                                boldText("nearby tram services with wheelchair access")
+                                append(".")
+                            },
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+
+                        Button(
+                            onClick = {
+                                viewModel.setAsNextPlan(itineraryTitle to "Paris")
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Set as Next Plan")
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color(0xFF9AA6B2),
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Text("Set as Next Plan", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                ) {
-                    Button(
-                        onClick = { /* TODO: Implement navigation logic */ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color(0xFF3A6EA5),
-                            contentColor = Color.White
+                item { AccessibilityInfo() }
+                item { DetailsNavigationRow(navController, itineraryTitle) }
+
+                item {
+                    Column(modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)) {
+                        Text(
+                            "Reviews",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
-                    ) {
-                        Icon(Icons.Filled.PlayArrow, contentDescription = "Navigate", modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("Start Navigation", fontSize = 18.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+
+                        Button(
+                            onClick = { navController.navigate("write_review/$itineraryTitle") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .padding(vertical = 8.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color(0xFF9AA6B2),
+                                contentColor = Color.Black
+                            )
+                        ) {
+                            Icon(
+                                Icons.Filled.Star,
+                                contentDescription = "Write Review",
+                                tint = Color.Black
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Write a Review", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
+                }
+
+                items(reviews) { review ->
+                    ReviewCard(review, navController, showItineraryButton = false)
                 }
             }
         }
     }
 }
 
+fun AnnotatedString.Builder.boldText(text: String) {
+    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+        append(text)
+    }
+}
+
 @Composable
 fun AccessibilityInfo() {
-    Column(modifier = Modifier.padding(16.dp)) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isExpanded = !isExpanded }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             "Accessibility Overview",
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f)
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Icon(
+            imageVector = if (isExpanded) Icons.Filled.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = "Expand/Collapse",
+            modifier = Modifier.size(24.dp)
+        )
+    }
 
+    if (isExpanded) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             AccessibilityTag("Wheelchair Accessible ✅", Color(0xFFDFF6DD))
@@ -195,7 +291,9 @@ fun AccessibilityInfo() {
 @Composable
 fun AccessibilityTag(label: String, backgroundColor: Color) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         backgroundColor = backgroundColor,
         shape = RoundedCornerShape(8.dp),
         elevation = 2.dp
@@ -213,163 +311,27 @@ fun AccessibilityTag(label: String, backgroundColor: Color) {
         }
     }
 }
-@Composable
-fun GeneralInfoSection() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            "General Information",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        GeneralInfoItem("⏳", "Duration", "Approx. 2-3 hours")
-        GeneralInfoItem("🚕", "Transport", "Accessible taxis, metro available")
-        GeneralInfoItem("❌", "Cancellation", "Free cancellation up to 24 hours before the trip")
-    }
-}
 
 @Composable
-fun GeneralInfoItem(icon: String, title: String, detail: String) {
-    Card(
+fun DetailsNavigationRow(navController: NavHostController, itineraryTitle: String) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        elevation = 2.dp,
-        backgroundColor = Color(0xFFF5F5F5)
+            .clickable { navController.navigate("itinerary_steps/$itineraryTitle") }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = icon,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = detail,
-                fontSize = 16.sp,
-                color = Color.DarkGray,
-                modifier = Modifier.weight(2f)
-            )
-        }
-    }
-}
-
-@Composable
-fun ItineraryStepsSection() {
-    Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            "What You'll Do",
+            "Details",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.weight(1f)
         )
-
-        val steps = listOf(
-            Pair("Arrive at Paris", "✈️"),
-            Pair("Visit the Louvre Museum", "🏛️"),
-            Pair("Lunch at an accessible restaurant", "🍽️"),
-            Pair("Take a scenic wheelchair-friendly route", "🛤️"),
-            Pair("Return to hotel with accessible transport", "🏨")
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = "Navigate to Details",
+            modifier = Modifier.size(24.dp)
         )
-
-        Column {
-            steps.forEach { (step, icon) ->
-                ItineraryStepCard(step, icon)
-            }
-        }
-    }
-}
-
-@Composable
-fun ItineraryStepCard(step: String, icon: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        elevation = 2.dp,
-        backgroundColor = Color(0xFFF5F5F5)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = icon,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Text(
-                text = step,
-                fontSize = 16.sp,
-                color = Color.Black
-            )
-        }
-    }
-}
-@Composable
-fun AlternativeRoutesSection() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            "Alternative Accessible Routes",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        val routes = listOf(
-            Pair("Wheelchair-accessible pathway via Rue de Rivoli", "🦽"),
-            Pair("Alternative elevator access at the museum", "🛗"),
-            Pair("Nearby tram service with wheelchair access", "🚋")
-        )
-
-        Column {
-            routes.forEach { (route, icon) ->
-                AlternativeRouteCard(route, icon)
-            }
-        }
-    }
-}
-
-@Composable
-fun AlternativeRouteCard(route: String, icon: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        elevation = 2.dp,
-        backgroundColor = Color(0xFFE8F5E9)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = icon,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Text(
-                text = route,
-                fontSize = 16.sp,
-                color = Color.Black
-            )
-        }
     }
 }
 
@@ -442,8 +404,8 @@ fun ReviewCard(review: Review, navController: NavHostController, showItineraryBu
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFF3A6EA5),
-                        contentColor = Color.White
+                        backgroundColor = Color(0xFF9AA6B2),
+                        contentColor = Color.Black
                     )
                 ) {
                     Text("View Itinerary", fontSize = 16.sp)
