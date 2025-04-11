@@ -30,7 +30,7 @@ fun WriteAReviewScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
-        topBar = { HomeTopBar() },
+        topBar = { HomeTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "profile") }
     ) { padding ->
         Surface(
@@ -38,7 +38,11 @@ fun WriteAReviewScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color(0xFF3A6EA5), Color(0xFF5A92D5))
+                        colors = listOf(
+                            Color(0xFFF8FAFC),
+                            Color(0xFFD9EAFD),
+                            Color(0xFFBCCCDC)
+                        )
                     )
                 )
                 .padding(padding)
@@ -50,22 +54,23 @@ fun WriteAReviewScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = 6.dp,
                     shape = RoundedCornerShape(12.dp),
                     backgroundColor = Color.White
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        // Rating Section
                         Text("Select Rating", fontSize = 18.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             for (i in 1..5) {
                                 IconButton(onClick = { rating = i }) {
                                     Icon(
@@ -77,16 +82,9 @@ fun WriteAReviewScreen(
                                 }
                             }
                         }
-                    }
-                }
+                        Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = 6.dp,
-                    shape = RoundedCornerShape(12.dp),
-                    backgroundColor = Color.White
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                        // Name Input
                         Text("Your Name (Optional)", fontSize = 18.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
@@ -96,13 +94,12 @@ fun WriteAReviewScreen(
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color(0xFF3A6EA5),
+                                focusedBorderColor = Color(0xFF9AA6B2),
                                 unfocusedBorderColor = Color.Gray,
                                 backgroundColor = Color.White
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
@@ -113,16 +110,9 @@ fun WriteAReviewScreen(
                             )
                             Text("Post as Anonymous", fontSize = 16.sp, color = Color.Black)
                         }
-                    }
-                }
+                        Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = 6.dp,
-                    shape = RoundedCornerShape(12.dp),
-                    backgroundColor = Color.White
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                        // Review Input
                         Text("Write Your Review", fontSize = 18.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
@@ -132,9 +122,9 @@ fun WriteAReviewScreen(
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp),
+                                .height(140.dp), // Increased height for usability
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Color(0xFF3A6EA5),
+                                focusedBorderColor = Color(0xFF9AA6B2),
                                 unfocusedBorderColor = Color.Gray,
                                 backgroundColor = Color.White
                             ),
@@ -147,6 +137,7 @@ fun WriteAReviewScreen(
                     Text(it, color = Color.Red, fontSize = 14.sp)
                 }
 
+                // Submit Button
                 Button(
                     onClick = {
                         if (rating == 0) {
@@ -158,8 +149,15 @@ fun WriteAReviewScreen(
                             return@Button
                         }
 
-                        val finalName = if (anonymous || userName.isBlank()) "Anonymous" else userName
-                        val newReview = Review(finalName.trim(), "Today", rating, reviewText.trim(), itineraryTitle)
+                        val finalName =
+                            if (anonymous || userName.isBlank()) "Anonymous" else userName
+                        val newReview = Review(
+                            finalName.trim(),
+                            "Today",
+                            rating,
+                            reviewText.trim(),
+                            itineraryTitle
+                        )
 
                         myReviewsViewModel.addReview(newReview)
 
@@ -179,7 +177,9 @@ fun WriteAReviewScreen(
                         .padding(top = 8.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = if (rating > 0 && reviewText.isNotBlank()) Color(0xFF3A6EA5) else Color.Gray,
+                        backgroundColor = if (rating > 0 && reviewText.isNotBlank()) Color(
+                            0xFF9AA6B2
+                        ) else Color.Gray,
                         contentColor = Color.White
                     ),
                     enabled = rating > 0 && reviewText.isNotBlank()
