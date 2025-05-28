@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="add-itinerary-steps" author="david">
+        <insert tableName="itinerary_steps">
+            <column name="id" value="aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1"/>
+            <column name="itinerary_id" value="11111111-1111-1111-1111-111111111111"/>
+            <column name="step_index" valueNumeric="1"/>
+            <column name="title" value="Visit the Louvre Museum"/>
+            <column name="description" value="Wheelchair-accessible entrance via Pyramid. Elevators available. Tactile guides for visually impaired visitors. Nearest accessible metro: Palais Royal – Musée du Louvre (150m)."/>
+            <column name="latitude" valueNumeric="48.8606"/>
+            <column name="longitude" valueNumeric="2.3376"/>
+            <column name="created_at" valueDate="2024-01-01T09:00:00"/>
+            <column name="updated_at" valueDate="2024-01-01T09:00:00"/>
+        </insert>
+
+        <insert tableName="itinerary_steps">
+            <column name="id" value="aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2"/>
+            <column name="itinerary_id" value="11111111-1111-1111-1111-111111111111"/>
+            <column name="step_index" valueNumeric="2"/>
+            <column name="title" value="Explore Notre Dame Cathedral"/>
+            <column name="description" value="Ramped access available on the south side. Interior access may be limited due to renovations. Nearest accessible metro: Saint-Michel Notre-Dame (300m)."/>
+            <column name="latitude" valueNumeric="48.852968"/>
+            <column name="longitude" valueNumeric="2.349902"/>
+            <column name="created_at" valueDate="2024-01-01T10:00:00"/>
+            <column name="updated_at" valueDate="2024-01-01T10:00:00"/>
+        </insert>
+
+        <insert tableName="itinerary_steps">
+            <column name="id" value="aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3"/>
+            <column name="itinerary_id" value="11111111-1111-1111-1111-111111111111"/>
+            <column name="step_index" valueNumeric="3"/>
+            <column name="title" value="Admire the Eiffel Tower"/>
+            <column name="description" value="Elevators to upper levels are wheelchair accessible. Priority access for visitors with disabilities. Nearest accessible metro: Bir-Hakeim (250m)."/>
+            <column name="latitude" valueNumeric="48.8584"/>
+            <column name="longitude" valueNumeric="2.2945"/>
+            <column name="created_at" valueDate="2024-01-01T11:00:00"/>
+            <column name="updated_at" valueDate="2024-01-01T11:00:00"/>
+        </insert>
+
+        <insert tableName="itinerary_steps">
+            <column name="id" value="aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4"/>
+            <column name="itinerary_id" value="11111111-1111-1111-1111-111111111111"/>
+            <column name="step_index" valueNumeric="4"/>
+            <column name="title" value="Walk around the Arc de Triomphe"/>
+            <column name="description" value="Great street-level views from Place Charles de Gaulle. No elevator access to rooftop. Nearest accessible metro: Charles de Gaulle – Étoile (200m)."/>
+            <column name="latitude" valueNumeric="48.8738"/>
+            <column name="longitude" valueNumeric="2.2950"/>
+            <column name="created_at" valueDate="2024-01-01T12:00:00"/>
+            <column name="updated_at" valueDate="2024-01-01T12:00:00"/>
+        </insert>
+
+        <insert tableName="itinerary_steps">
+            <column name="id" value="aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5"/>
+            <column name="itinerary_id" value="11111111-1111-1111-1111-111111111111"/>
+            <column name="step_index" valueNumeric="5"/>
+            <column name="title" value="Discover the Pantheon"/>
+            <column name="description" value="Main entrance has ramped access. Interior adapted for wheelchair users. Tactile exhibits available. Nearest accessible metro: Cardinal Lemoine (180m)."/>
+            <column name="latitude" valueNumeric="48.8462"/>
+            <column name="longitude" valueNumeric="2.3371"/>
+            <column name="created_at" valueDate="2024-01-01T13:00:00"/>
+            <column name="updated_at" valueDate="2024-01-01T13:00:00"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
