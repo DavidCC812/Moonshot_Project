@@ -179,4 +179,20 @@
 
         </sql>
     </changeSet>
+
+    <changeSet id="2" author="david">
+        <sql dbms="postgresql">
+            ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="3" author="david">
+        <sql dbms="postgresql">
+            ALTER TABLE itineraries ADD COLUMN image_url VARCHAR(500);
+        </sql>
+    </changeSet>
+
+
+
+
 </databaseChangeLog>
