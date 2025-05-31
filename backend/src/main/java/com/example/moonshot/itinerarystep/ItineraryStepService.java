@@ -1,5 +1,6 @@
 package com.example.moonshot.itinerarystep;
 
+import com.example.moonshot.exception.MoonshotException;
 import com.example.moonshot.itinerary.Itinerary;
 import com.example.moonshot.itinerary.ItineraryRepository;
 import com.example.moonshot.itinerarystep.dto.ItineraryStepRequest;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ItineraryStepService {
@@ -27,28 +27,26 @@ public class ItineraryStepService {
     public List<ItineraryStepResponse> getAll() {
         return itineraryStepRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .map(ItineraryStepResponse::from)
+                .toList();
     }
 
-    public ItineraryStepResponse getById(UUID id) {
+    public ItineraryStep getById(UUID id) {
         return itineraryStepRepository.findById(id)
-                .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("Itinerary step not found"));
     }
 
     public List<ItineraryStepResponse> getByItineraryId(UUID itineraryId) {
         return itineraryStepRepository.findByItinerary_IdOrderByStepIndexAsc(itineraryId)
                 .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .map(ItineraryStepResponse::from)
+                .toList();
     }
 
-
     @Transactional
-    public ItineraryStepResponse create(ItineraryStepRequest request) {
+    public ItineraryStep create(ItineraryStepRequest request) {
         Itinerary itinerary = itineraryRepository.findById(request.getItineraryId())
-                .orElseThrow(() -> new IllegalArgumentException("Itinerary not found"));
+                .orElseThrow(() -> new MoonshotException("Itinerary not found"));
 
         ItineraryStep step = ItineraryStep.builder()
                 .itinerary(itinerary)
@@ -61,25 +59,10 @@ public class ItineraryStepService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        ItineraryStep saved = itineraryStepRepository.save(step);
-        return mapToResponse(saved);
+        return itineraryStepRepository.save(step);
     }
 
     public void delete(UUID id) {
         itineraryStepRepository.deleteById(id);
-    }
-
-    private ItineraryStepResponse mapToResponse(ItineraryStep step) {
-        return ItineraryStepResponse.builder()
-                .id(step.getId())
-                .itineraryId(step.getItinerary().getId())
-                .stepIndex(step.getStepIndex())
-                .title(step.getTitle())
-                .description(step.getDescription())
-                .latitude(step.getLatitude())
-                .longitude(step.getLongitude())
-                .createdAt(step.getCreatedAt())
-                .updatedAt(step.getUpdatedAt())
-                .build();
     }
 }
