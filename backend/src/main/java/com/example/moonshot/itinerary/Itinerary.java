@@ -35,6 +35,9 @@ public class Itinerary {
     @JoinColumn(name = "destination_id", nullable = false)
     private Destination destination;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

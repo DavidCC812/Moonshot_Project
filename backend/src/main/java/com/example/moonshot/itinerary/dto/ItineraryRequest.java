@@ -15,4 +15,5 @@ public class ItineraryRequest {
     private Integer duration;
     private Float rating;
     private UUID destinationId;
+    private String imageUrl;
 }
