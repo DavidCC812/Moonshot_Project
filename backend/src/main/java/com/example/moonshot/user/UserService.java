@@ -1,5 +1,6 @@
 package com.example.moonshot.user;
 
+import com.example.moonshot.exception.MoonshotException;
 import com.example.moonshot.user.dto.UserRequest;
 import com.example.moonshot.user.dto.UserResponse;
 import jakarta.transaction.Transactional;
@@ -25,57 +26,59 @@ public class UserService {
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(this::mapToResponseDto)
+                .map(UserResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public UserResponse getUserById(UUID id) {
+    public User getUserById(UUID id) {
         return userRepository.findById(id)
-                .map(this::mapToResponseDto)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("User not found"));
     }
 
-    public UserResponse getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .map(this::mapToResponseDto)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("User not found by email"));
     }
 
-    public UserResponse getUserByPhone(String phone) {
+    public User getUserByPhone(String phone) {
         return userRepository.findByPhone(phone)
-                .map(this::mapToResponseDto)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("User not found by phone"));
     }
 
     @Transactional
-    public UserResponse createUser(UserRequest dto) {
-        User user = User.builder()
+    public User createUser(UserRequest dto) {
+        String platform = dto.getPlatform() != null ? dto.getPlatform().toUpperCase() : "EMAIL";
+
+        if (platform.equals("EMAIL")) {
+            if (dto.getPasswordHash() == null || dto.getPasswordHash().isBlank()) {
+                throw new IllegalArgumentException("Password is required for EMAIL platform users");
+            }
+        } else {
+            if (dto.getPasswordHash() != null && !dto.getPasswordHash().isBlank()) {
+                throw new IllegalArgumentException("OAuth users must not provide a password");
+            }
+        }
+
+        User.UserBuilder builder = User.builder()
                 .name(dto.getName())
                 .nickname(dto.getNickname())
                 .email(dto.getEmail())
-                .passwordHash(passwordEncoder.encode(dto.getPasswordHash()))
                 .phone(dto.getPhone())
+                .platform(platform)
                 .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+                .updatedAt(LocalDateTime.now());
 
-        User saved = userRepository.save(user);
-        return mapToResponseDto(saved);
+        if (platform.equals("EMAIL")) {
+            builder.passwordHash(passwordEncoder.encode(dto.getPasswordHash()));
+        }
+
+        User user = builder.build();
+
+        return userRepository.save(user);
     }
 
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);
     }
 
-    private UserResponse mapToResponseDto(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-    }
 }

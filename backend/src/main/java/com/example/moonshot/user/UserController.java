@@ -2,7 +2,6 @@ package com.example.moonshot.user;
 
 import com.example.moonshot.user.dto.UserRequest;
 import com.example.moonshot.user.dto.UserResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,48 +18,36 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public List<UserResponse> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
-        UserResponse user = userService.getUserById(id);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(user);
+    public UserResponse getUserById(@PathVariable UUID id) {
+        User user = userService.getUserById(id);
+        return UserResponse.from(user);
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
-        UserResponse user = userService.getUserByEmail(email);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(user);
+    public UserResponse getUserByEmail(@PathVariable String email) {
+        User user = userService.getUserByEmail(email);
+        return UserResponse.from(user);
     }
 
     @GetMapping("/phone/{phone}")
-    public ResponseEntity<UserResponse> getUserByPhone(@PathVariable String phone) {
-        UserResponse user = userService.getUserByPhone(phone);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(user);
+    public UserResponse getUserByPhone(@PathVariable String phone) {
+        User user = userService.getUserByPhone(phone);
+        return UserResponse.from(user);
     }
 
-
-
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest userDto) {
-        UserResponse createdUser = userService.createUser(userDto);
-        return ResponseEntity.ok(createdUser);
+    public UserResponse createUser(@RequestBody UserRequest userDto) {
+        User user = userService.createUser(userDto);
+        return UserResponse.from(user);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+    public void deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
     }
 }
