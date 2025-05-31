@@ -61,16 +61,23 @@ public class AuthService {
                 .build();
     }
 
-    private LoginResponse loginOrRegisterWithFirebasePayload(Map<String, Object> payload) {
+    private LoginResponse loginOrRegisterWithFirebasePayload(Map<String, Object> payload, String idToken, String platform) {
         String email = (String) payload.get("email");
         String name = (String) payload.get("name");
 
         Optional<User> existingUser = userRepository.findByEmail(email);
 
-        User user = existingUser.orElseGet(() -> {
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setName(name);
+        User user = existingUser.map(u -> {
+            u.setOauthToken(idToken);
+            u.setPlatform(platform);
+            return userRepository.save(u);
+        }).orElseGet(() -> {
+            User newUser = User.builder()
+                    .name(name)
+                    .email(email)
+                    .platform(platform)
+                    .oauthToken(idToken)
+                    .build();
             return userRepository.save(newUser);
         });
 
@@ -88,21 +95,19 @@ public class AuthService {
 
     public LoginResponse loginOrRegisterWithGoogle(GoogleSignInRequest request) {
         Map<String, Object> payload = firebaseTokenVerifier.verify(request.getIdToken());
-        return loginOrRegisterWithFirebasePayload(payload);
+        return loginOrRegisterWithFirebasePayload(payload, request.getIdToken(), "GOOGLE");
     }
 
     public LoginResponse loginOrRegisterWithFacebook(FacebookSignInRequest request) {
         log.info("Received Facebook token: {}", request.getIdToken());
-
         try {
             Map<String, Object> payload = firebaseTokenVerifier.verify(request.getIdToken());
             log.info("Token verified successfully: {}", payload);
-            return loginOrRegisterWithFirebasePayload(payload);
+            return loginOrRegisterWithFirebasePayload(payload, request.getIdToken(), "FACEBOOK");
         } catch (Exception e) {
             log.error("Token verification failed", e);
             throw new IllegalArgumentException("Invalid Facebook token");
         }
     }
-
 
 }
