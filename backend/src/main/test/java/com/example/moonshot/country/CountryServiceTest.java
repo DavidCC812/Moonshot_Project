@@ -46,6 +46,7 @@ class CountryServiceTest {
                 .email("user@example.com")
                 .passwordHash(passwordEncoder.encode("secret"))
                 .name("Test User")
+                .platform("EMAIL")
                 .build());
 
         LoginRequest loginRequest = new LoginRequest();
