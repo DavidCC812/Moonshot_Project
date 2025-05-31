@@ -4,6 +4,7 @@ import com.example.moonshot.country.Country;
 import com.example.moonshot.country.CountryRepository;
 import com.example.moonshot.destination.dto.DestinationRequest;
 import com.example.moonshot.destination.dto.DestinationResponse;
+import com.example.moonshot.exception.MoonshotException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -26,25 +27,30 @@ public class DestinationService {
     public List<DestinationResponse> getAllDestinations() {
         return destinationRepository.findAll()
                 .stream()
-                .map(this::mapToResponseDto)
+                .map(DestinationResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    public List<DestinationResponse> getAvailableDestinations() {
+        return destinationRepository.findAllByAvailableTrue()
+                .stream()
+                .map(DestinationResponse::from)
+                .toList();
     }
 
     public List<String> getAllDestinationTypes() {
         return destinationRepository.findDistinctTypes();
     }
 
-
-    public DestinationResponse getDestinationById(UUID id) {
+    public Destination getDestinationById(UUID id) {
         return destinationRepository.findById(id)
-                .map(this::mapToResponseDto)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("Destination not found"));
     }
 
     @Transactional
-    public DestinationResponse createDestination(DestinationRequest dto) {
+    public Destination createDestination(DestinationRequest dto) {
         Country country = countryRepository.findById(dto.getCountryId())
-                .orElseThrow(() -> new IllegalArgumentException("Country not found: " + dto.getCountryId()));
+                .orElseThrow(() -> new MoonshotException("Country not found"));
 
         Destination destination = Destination.builder()
                 .name(dto.getName())
@@ -55,31 +61,10 @@ public class DestinationService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        Destination saved = destinationRepository.save(destination);
-        return mapToResponseDto(saved);
+        return destinationRepository.save(destination);
     }
 
     public void deleteDestination(UUID id) {
         destinationRepository.deleteById(id);
-    }
-
-    public List<DestinationResponse> getAvailableDestinations() {
-        return destinationRepository.findAllByAvailableTrue()
-                .stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    private DestinationResponse mapToResponseDto(Destination destination) {
-        return DestinationResponse.builder()
-                .id(destination.getId())
-                .name(destination.getName())
-                .type(destination.getType())
-                .available(destination.isAvailable())
-                .countryId(destination.getCountry().getId())
-                .countryName(destination.getCountry().getName())
-                .createdAt(destination.getCreatedAt())
-                .updatedAt(destination.getUpdatedAt())
-                .build();
     }
 }

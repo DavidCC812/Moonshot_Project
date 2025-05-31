@@ -2,8 +2,6 @@ package com.example.moonshot.destination;
 
 import com.example.moonshot.destination.dto.DestinationRequest;
 import com.example.moonshot.destination.dto.DestinationResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,39 +18,34 @@ public class DestinationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DestinationResponse>> getAllDestinations() {
-        return ResponseEntity.ok(destinationService.getAllDestinations());
+    public List<DestinationResponse> getAllDestinations() {
+        return destinationService.getAllDestinations();
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<DestinationResponse>> getAvailableDestinations() {
-        return ResponseEntity.ok(destinationService.getAvailableDestinations());
+    public List<DestinationResponse> getAvailableDestinations() {
+        return destinationService.getAvailableDestinations();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DestinationResponse> getDestinationById(@PathVariable UUID id) {
-        DestinationResponse destination = destinationService.getDestinationById(id);
-        if (destination == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(destination);
+    public DestinationResponse getDestinationById(@PathVariable UUID id) {
+        Destination destination = destinationService.getDestinationById(id);
+        return DestinationResponse.from(destination);
     }
 
     @GetMapping("/types")
-    public ResponseEntity<List<String>> getDestinationTypes() {
-        return ResponseEntity.ok(destinationService.getAllDestinationTypes());
+    public List<String> getDestinationTypes() {
+        return destinationService.getAllDestinationTypes();
     }
 
-
     @PostMapping
-    public ResponseEntity<DestinationResponse> createDestination(@RequestBody DestinationRequest request) {
-        DestinationResponse created = destinationService.createDestination(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public DestinationResponse createDestination(@RequestBody DestinationRequest request) {
+        Destination destination = destinationService.createDestination(request);
+        return DestinationResponse.from(destination);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDestination(@PathVariable UUID id) {
+    public void deleteDestination(@PathVariable UUID id) {
         destinationService.deleteDestination(id);
-        return ResponseEntity.noContent().build();
     }
 }
