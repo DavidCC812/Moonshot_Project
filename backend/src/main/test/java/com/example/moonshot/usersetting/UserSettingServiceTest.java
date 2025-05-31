@@ -50,6 +50,7 @@ class UserSettingServiceTest {
                 .name("Test User")
                 .email("test@example.com")
                 .passwordHash(passwordEncoder.encode("secure123"))
+                .platform("EMAIL")
                 .phone("123456789")
                 .build());
 
@@ -150,4 +151,51 @@ class UserSettingServiceTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void shouldUpdateUserSetting() throws Exception {
+        // Create a setting and save a user setting (initially true)
+        Setting setting = settingRepository.save(Setting.builder()
+                .settingKey("receive_updates")
+                .label("Receive Updates")
+                .description("Enable updates")
+                .defaultValue(true)
+                .build());
+
+        UUID settingId = setting.getId();
+
+        UUID settingRecordId = userSettingRepository.save(UserSetting.builder()
+                .user(user)
+                .setting(setting)
+                .value(true)
+                .build()).getId();
+
+        // Confirm initial value is true
+        mockMvc.perform(get("/api/user-settings/" + settingRecordId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.value").value(true));
+
+        // Create update request to set it to false
+        UserSettingRequest updateRequest = UserSettingRequest.builder()
+                .userId(user.getId())
+                .settingId(settingId)
+                .value(false)
+                .build();
+
+        // Perform PUT request
+        mockMvc.perform(put("/api/user-settings/" + settingRecordId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.value").value(false));
+
+        // Confirm value is now false
+        mockMvc.perform(get("/api/user-settings/" + settingRecordId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.value").value(false));
+    }
+
 }
