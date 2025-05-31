@@ -1,5 +1,6 @@
 package com.example.moonshot.itineraryaccessibility.dto;
 
+import com.example.moonshot.itineraryaccessibility.ItineraryAccessibility;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,4 +15,14 @@ public class ItineraryAccessibilityResponse {
     private UUID featureId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static ItineraryAccessibilityResponse from(ItineraryAccessibility entity) {
+        return ItineraryAccessibilityResponse.builder()
+                .id(entity.getId())
+                .itineraryId(entity.getItinerary().getId())
+                .featureId(entity.getFeature().getId())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
 }

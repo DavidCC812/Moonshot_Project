@@ -1,5 +1,6 @@
 package com.example.moonshot.user.dto;
 
+import com.example.moonshot.user.User;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,4 +17,16 @@ public class UserResponse {
     private String phone;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static UserResponse from(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
 }

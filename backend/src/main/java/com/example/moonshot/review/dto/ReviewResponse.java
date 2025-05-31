@@ -1,5 +1,6 @@
 package com.example.moonshot.review.dto;
 
+import com.example.moonshot.review.Review;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,4 +17,16 @@ public class ReviewResponse {
     private String comment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static ReviewResponse from(Review review) {
+        return ReviewResponse.builder()
+                .id(review.getId())
+                .userId(review.getUser().getId())
+                .itineraryId(review.getItinerary().getId())
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .createdAt(review.getCreatedAt())
+                .updatedAt(review.getUpdatedAt())
+                .build();
+    }
 }

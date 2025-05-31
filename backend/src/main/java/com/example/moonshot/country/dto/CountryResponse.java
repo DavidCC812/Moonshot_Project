@@ -1,5 +1,6 @@
 package com.example.moonshot.country.dto;
 
+import com.example.moonshot.country.Country;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,4 +15,14 @@ public class CountryResponse {
     private boolean available;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static CountryResponse from(Country country) {
+        return CountryResponse.builder()
+                .id(country.getId())
+                .name(country.getName())
+                .available(country.isAvailable())
+                .createdAt(country.getCreatedAt())
+                .updatedAt(country.getUpdatedAt())
+                .build();
+    }
 }

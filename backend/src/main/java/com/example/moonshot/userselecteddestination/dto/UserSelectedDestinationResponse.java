@@ -1,5 +1,6 @@
 package com.example.moonshot.userselecteddestination.dto;
 
+import com.example.moonshot.userselecteddestination.UserSelectedDestination;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,4 +16,15 @@ public class UserSelectedDestinationResponse {
     private String destinationName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static UserSelectedDestinationResponse from(UserSelectedDestination entity) {
+        return UserSelectedDestinationResponse.builder()
+                .id(entity.getId())
+                .userId(entity.getUser().getId())
+                .destinationId(entity.getDestination().getId())
+                .destinationName(entity.getDestination().getName())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
 }
