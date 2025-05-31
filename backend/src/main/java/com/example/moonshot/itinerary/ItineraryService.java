@@ -2,6 +2,7 @@ package com.example.moonshot.itinerary;
 
 import com.example.moonshot.destination.Destination;
 import com.example.moonshot.destination.DestinationRepository;
+import com.example.moonshot.exception.MoonshotException;
 import com.example.moonshot.itinerary.dto.ItineraryRequest;
 import com.example.moonshot.itinerary.dto.ItineraryResponse;
 import jakarta.transaction.Transactional;
@@ -26,20 +27,19 @@ public class ItineraryService {
     public List<ItineraryResponse> getAllItineraries() {
         return itineraryRepository.findAll()
                 .stream()
-                .map(this::mapToResponseDto)
+                .map(ItineraryResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public ItineraryResponse getItineraryById(UUID id) {
+    public Itinerary getItineraryById(UUID id) {
         return itineraryRepository.findById(id)
-                .map(this::mapToResponseDto)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("Itinerary not found"));
     }
 
     @Transactional
-    public ItineraryResponse createItinerary(ItineraryRequest request) {
+    public Itinerary createItinerary(ItineraryRequest request) {
         Destination destination = destinationRepository.findById(request.getDestinationId())
-                .orElseThrow(() -> new IllegalArgumentException("Destination not found"));
+                .orElseThrow(() -> new MoonshotException("Destination not found"));
 
         Itinerary itinerary = Itinerary.builder()
                 .title(request.getTitle())
@@ -48,29 +48,15 @@ public class ItineraryService {
                 .duration(request.getDuration())
                 .rating(request.getRating())
                 .destination(destination)
+                .imageUrl(request.getImageUrl())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        Itinerary saved = itineraryRepository.save(itinerary);
-        return mapToResponseDto(saved);
+        return itineraryRepository.save(itinerary);
     }
 
     public void deleteItinerary(UUID id) {
         itineraryRepository.deleteById(id);
-    }
-
-    private ItineraryResponse mapToResponseDto(Itinerary itinerary) {
-        return ItineraryResponse.builder()
-                .id(itinerary.getId())
-                .title(itinerary.getTitle())
-                .description(itinerary.getDescription())
-                .price(itinerary.getPrice())
-                .duration(itinerary.getDuration())
-                .rating(itinerary.getRating())
-                .destinationId(itinerary.getDestination().getId())
-                .createdAt(itinerary.getCreatedAt())
-                .updatedAt(itinerary.getUpdatedAt())
-                .build();
     }
 }
