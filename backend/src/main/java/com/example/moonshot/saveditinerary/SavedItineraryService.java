@@ -1,5 +1,6 @@
 package com.example.moonshot.saveditinerary;
 
+import com.example.moonshot.exception.MoonshotException;
 import com.example.moonshot.itinerary.Itinerary;
 import com.example.moonshot.itinerary.ItineraryRepository;
 import com.example.moonshot.saveditinerary.dto.SavedItineraryRequest;
@@ -31,51 +32,38 @@ public class SavedItineraryService {
 
     public List<SavedItineraryResponse> getAll() {
         return repository.findAll().stream()
-                .map(this::mapToResponse)
+                .map(SavedItineraryResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public SavedItineraryResponse getById(UUID id) {
+    public SavedItinerary getById(UUID id) {
         return repository.findById(id)
-                .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("Saved itinerary not found"));
     }
 
     public List<SavedItineraryResponse> getByUserId(UUID userId) {
         return repository.findByUserId(userId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .map(SavedItineraryResponse::from)
+                .toList();
     }
 
-
     @Transactional
-    public SavedItineraryResponse create(SavedItineraryRequest request) {
+    public SavedItinerary create(SavedItineraryRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new MoonshotException("User not found"));
 
         Itinerary itinerary = itineraryRepository.findById(request.getItineraryId())
-                .orElseThrow(() -> new IllegalArgumentException("Itinerary not found"));
+                .orElseThrow(() -> new MoonshotException("Itinerary not found"));
 
         SavedItinerary saved = SavedItinerary.builder()
                 .user(user)
                 .itinerary(itinerary)
                 .build();
 
-        return mapToResponse(repository.save(saved));
+        return repository.save(saved);
     }
 
     public void delete(UUID id) {
         repository.deleteById(id);
-    }
-
-    private SavedItineraryResponse mapToResponse(SavedItinerary entity) {
-        return SavedItineraryResponse.builder()
-                .id(entity.getId())
-                .userId(entity.getUser().getId())
-                .itineraryId(entity.getItinerary().getId())
-                .savedAt(entity.getSavedAt())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .build();
     }
 }

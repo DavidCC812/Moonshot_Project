@@ -2,7 +2,6 @@ package com.example.moonshot.saveditinerary;
 
 import com.example.moonshot.saveditinerary.dto.SavedItineraryRequest;
 import com.example.moonshot.saveditinerary.dto.SavedItineraryResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,34 +18,29 @@ public class SavedItineraryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SavedItineraryResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public List<SavedItineraryResponse> getAll() {
+        return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SavedItineraryResponse> getById(@PathVariable UUID id) {
-        SavedItineraryResponse response = service.getById(id);
-        if (response == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(response);
+    public SavedItineraryResponse getById(@PathVariable UUID id) {
+        SavedItinerary saved = service.getById(id);
+        return SavedItineraryResponse.from(saved);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<SavedItineraryResponse>> getByUserId(@PathVariable UUID userId) {
-        return ResponseEntity.ok(service.getByUserId(userId));
+    public List<SavedItineraryResponse> getByUserId(@PathVariable UUID userId) {
+        return service.getByUserId(userId);
     }
 
-
     @PostMapping
-    public ResponseEntity<SavedItineraryResponse> create(@RequestBody SavedItineraryRequest request) {
-        SavedItineraryResponse created = service.create(request);
-        return ResponseEntity.status(201).body(created);
+    public SavedItineraryResponse create(@RequestBody SavedItineraryRequest request) {
+        SavedItinerary saved = service.create(request);
+        return SavedItineraryResponse.from(saved);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public void delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }
