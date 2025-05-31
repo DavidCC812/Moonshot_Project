@@ -2,8 +2,6 @@ package com.example.moonshot.userselecteddestination;
 
 import com.example.moonshot.userselecteddestination.dto.UserSelectedDestinationRequest;
 import com.example.moonshot.userselecteddestination.dto.UserSelectedDestinationResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,28 +18,24 @@ public class UserSelectedDestinationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserSelectedDestinationResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public List<UserSelectedDestinationResponse> getAll() {
+        return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserSelectedDestinationResponse> getById(@PathVariable UUID id) {
-        UserSelectedDestinationResponse response = service.getById(id);
-        if (response == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(response);
+    public UserSelectedDestinationResponse getById(@PathVariable UUID id) {
+        UserSelectedDestination entity = service.getById(id);
+        return UserSelectedDestinationResponse.from(entity);
     }
 
     @PostMapping
-    public ResponseEntity<UserSelectedDestinationResponse> create(@RequestBody UserSelectedDestinationRequest request) {
-        UserSelectedDestinationResponse created = service.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public UserSelectedDestinationResponse create(@RequestBody UserSelectedDestinationRequest request) {
+        UserSelectedDestination created = service.create(request);
+        return UserSelectedDestinationResponse.from(created);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public void delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }
