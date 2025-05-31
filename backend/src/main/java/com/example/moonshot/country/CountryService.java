@@ -2,6 +2,7 @@ package com.example.moonshot.country;
 
 import com.example.moonshot.country.dto.CountryRequest;
 import com.example.moonshot.country.dto.CountryResponse;
+import com.example.moonshot.exception.MoonshotException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -20,19 +21,19 @@ public class CountryService {
     }
 
     public List<CountryResponse> getAllCountries() {
-        return countryRepository.findAll().stream()
-                .map(this::mapToResponseDto)
+        return countryRepository.findAll()
+                .stream()
+                .map(CountryResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public CountryResponse getCountryById(UUID id) {
+    public Country getCountryById(UUID id) {
         return countryRepository.findById(id)
-                .map(this::mapToResponseDto)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("Country not found"));
     }
 
     @Transactional
-    public CountryResponse createCountry(CountryRequest request) {
+    public Country createCountry(CountryRequest request) {
         Country country = Country.builder()
                 .name(request.getName())
                 .available(request.isAvailable())
@@ -40,20 +41,10 @@ public class CountryService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        return mapToResponseDto(countryRepository.save(country));
+        return countryRepository.save(country);
     }
 
     public void deleteCountry(UUID id) {
         countryRepository.deleteById(id);
-    }
-
-    private CountryResponse mapToResponseDto(Country country) {
-        return CountryResponse.builder()
-                .id(country.getId())
-                .name(country.getName())
-                .available(country.isAvailable())
-                .createdAt(country.getCreatedAt())
-                .updatedAt(country.getUpdatedAt())
-                .build();
     }
 }

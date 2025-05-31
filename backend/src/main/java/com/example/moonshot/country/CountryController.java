@@ -2,8 +2,6 @@ package com.example.moonshot.country;
 
 import com.example.moonshot.country.dto.CountryRequest;
 import com.example.moonshot.country.dto.CountryResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,28 +18,24 @@ public class CountryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CountryResponse>> getAllCountries() {
-        return ResponseEntity.ok(countryService.getAllCountries());
+    public List<CountryResponse> getAllCountries() {
+        return countryService.getAllCountries();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CountryResponse> getCountryById(@PathVariable UUID id) {
-        CountryResponse response = countryService.getCountryById(id);
-        if (response == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(response);
+    public CountryResponse getCountryById(@PathVariable UUID id) {
+        Country country = countryService.getCountryById(id);
+        return CountryResponse.from(country);
     }
 
     @PostMapping
-    public ResponseEntity<CountryResponse> createCountry(@RequestBody CountryRequest request) {
-        CountryResponse created = countryService.createCountry(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public CountryResponse createCountry(@RequestBody CountryRequest request) {
+        Country country = countryService.createCountry(request);
+        return CountryResponse.from(country);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCountry(@PathVariable UUID id) {
+    public void deleteCountry(@PathVariable UUID id) {
         countryService.deleteCountry(id);
-        return ResponseEntity.noContent().build();
     }
 }
