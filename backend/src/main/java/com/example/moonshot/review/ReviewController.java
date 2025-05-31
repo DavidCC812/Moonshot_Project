@@ -2,7 +2,6 @@ package com.example.moonshot.review;
 
 import com.example.moonshot.review.dto.ReviewRequest;
 import com.example.moonshot.review.dto.ReviewResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,28 +18,24 @@ public class ReviewController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReviewResponse>> getAllReviews() {
-        return ResponseEntity.ok(reviewService.getAllReviews());
+    public List<ReviewResponse> getAllReviews() {
+        return reviewService.getAllReviews();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReviewResponse> getReviewById(@PathVariable UUID id) {
-        ReviewResponse review = reviewService.getReviewById(id);
-        if (review == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(review);
+    public ReviewResponse getReviewById(@PathVariable UUID id) {
+        Review review = reviewService.getReviewById(id);
+        return ReviewResponse.from(review);
     }
 
     @PostMapping
-    public ResponseEntity<ReviewResponse> createReview(@RequestBody ReviewRequest request) {
-        ReviewResponse created = reviewService.createReview(request);
-        return ResponseEntity.status(201).body(created);
+    public ReviewResponse createReview(@RequestBody ReviewRequest request) {
+        Review created = reviewService.createReview(request);
+        return ReviewResponse.from(created);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable UUID id) {
+    public void deleteReview(@PathVariable UUID id) {
         reviewService.deleteReview(id);
-        return ResponseEntity.noContent().build();
     }
 }

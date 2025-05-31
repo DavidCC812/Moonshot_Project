@@ -1,5 +1,6 @@
 package com.example.moonshot.review;
 
+import com.example.moonshot.exception.MoonshotException;
 import com.example.moonshot.itinerary.Itinerary;
 import com.example.moonshot.itinerary.ItineraryRepository;
 import com.example.moonshot.review.dto.ReviewRequest;
@@ -31,23 +32,22 @@ public class ReviewService {
     public List<ReviewResponse> getAllReviews() {
         return reviewRepository.findAllWithRelations()
                 .stream()
-                .map(this::mapToResponse)
+                .map(ReviewResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public ReviewResponse getReviewById(UUID id) {
+    public Review getReviewById(UUID id) {
         return reviewRepository.findById(id)
-                .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("Review not found"));
     }
 
     @Transactional
-    public ReviewResponse createReview(ReviewRequest request) {
+    public Review createReview(ReviewRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new MoonshotException("User not found"));
 
         Itinerary itinerary = itineraryRepository.findById(request.getItineraryId())
-                .orElseThrow(() -> new IllegalArgumentException("Itinerary not found"));
+                .orElseThrow(() -> new MoonshotException("Itinerary not found"));
 
         Review review = Review.builder()
                 .user(user)
@@ -56,23 +56,10 @@ public class ReviewService {
                 .comment(request.getComment())
                 .build();
 
-        Review saved = reviewRepository.save(review);
-        return mapToResponse(saved);
+        return reviewRepository.save(review);
     }
 
     public void deleteReview(UUID id) {
         reviewRepository.deleteById(id);
-    }
-
-    private ReviewResponse mapToResponse(Review review) {
-        return ReviewResponse.builder()
-                .id(review.getId())
-                .userId(review.getUser().getId())
-                .itineraryId(review.getItinerary().getId())
-                .rating(review.getRating())
-                .comment(review.getComment())
-                .createdAt(review.getCreatedAt())
-                .updatedAt(review.getUpdatedAt())
-                .build();
     }
 }
