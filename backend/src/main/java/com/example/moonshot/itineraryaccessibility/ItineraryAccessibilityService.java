@@ -2,6 +2,7 @@ package com.example.moonshot.itineraryaccessibility;
 
 import com.example.moonshot.accessibilityfeature.AccessibilityFeature;
 import com.example.moonshot.accessibilityfeature.AccessibilityFeatureRepository;
+import com.example.moonshot.exception.MoonshotException;
 import com.example.moonshot.itinerary.Itinerary;
 import com.example.moonshot.itinerary.ItineraryRepository;
 import com.example.moonshot.itineraryaccessibility.dto.ItineraryAccessibilityRequest;
@@ -32,44 +33,32 @@ public class ItineraryAccessibilityService {
     public List<ItineraryAccessibilityResponse> getAll() {
         return repository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(ItineraryAccessibilityResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public ItineraryAccessibilityResponse getById(UUID id) {
+    public ItineraryAccessibility getById(UUID id) {
         return repository.findById(id)
-                .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("ItineraryAccessibility relation not found"));
     }
 
     @Transactional
-    public ItineraryAccessibilityResponse create(ItineraryAccessibilityRequest request) {
+    public ItineraryAccessibility create(ItineraryAccessibilityRequest request) {
         Itinerary itinerary = itineraryRepository.findById(request.getItineraryId())
-                .orElseThrow(() -> new IllegalArgumentException("Itinerary not found"));
+                .orElseThrow(() -> new MoonshotException("Itinerary not found"));
 
         AccessibilityFeature feature = featureRepository.findById(request.getFeatureId())
-                .orElseThrow(() -> new IllegalArgumentException("Accessibility feature not found"));
+                .orElseThrow(() -> new MoonshotException("Accessibility feature not found"));
 
         ItineraryAccessibility entity = ItineraryAccessibility.builder()
                 .itinerary(itinerary)
                 .feature(feature)
                 .build();
 
-        ItineraryAccessibility saved = repository.save(entity);
-        return mapToResponse(saved);
+        return repository.save(entity);
     }
 
     public void delete(UUID id) {
         repository.deleteById(id);
-    }
-
-    private ItineraryAccessibilityResponse mapToResponse(ItineraryAccessibility entity) {
-        return ItineraryAccessibilityResponse.builder()
-                .id(entity.getId())
-                .itineraryId(entity.getItinerary().getId())
-                .featureId(entity.getFeature().getId())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .build();
     }
 }
