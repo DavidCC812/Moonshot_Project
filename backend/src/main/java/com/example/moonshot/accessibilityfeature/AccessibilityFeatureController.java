@@ -2,8 +2,6 @@ package com.example.moonshot.accessibilityfeature;
 
 import com.example.moonshot.accessibilityfeature.dto.AccessibilityFeatureRequest;
 import com.example.moonshot.accessibilityfeature.dto.AccessibilityFeatureResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,28 +18,25 @@ public class AccessibilityFeatureController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AccessibilityFeatureResponse>> getAllFeatures() {
-        return ResponseEntity.ok(featureService.getAllFeatures());
+    public List<AccessibilityFeatureResponse> getAllFeatures() {
+        return featureService.getAllFeatures();
     }
 
+
     @GetMapping("/{id}")
-    public ResponseEntity<AccessibilityFeatureResponse> getFeatureById(@PathVariable UUID id) {
-        AccessibilityFeatureResponse feature = featureService.getFeatureById(id);
-        if (feature == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(feature);
+    public AccessibilityFeatureResponse getFeatureById(@PathVariable UUID id) {
+        AccessibilityFeature feature = featureService.getFeatureById(id);
+        return AccessibilityFeatureResponse.from(feature);
     }
 
     @PostMapping
-    public ResponseEntity<AccessibilityFeatureResponse> createFeature(@RequestBody AccessibilityFeatureRequest request) {
-        AccessibilityFeatureResponse created = featureService.createFeature(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public AccessibilityFeatureResponse createFeature(@RequestBody AccessibilityFeatureRequest request) {
+        AccessibilityFeature created = featureService.createFeature(request);
+        return AccessibilityFeatureResponse.from(created);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFeature(@PathVariable UUID id) {
+    public void deleteFeature(@PathVariable UUID id) {
         featureService.deleteFeature(id);
-        return ResponseEntity.noContent().build();
     }
 }
