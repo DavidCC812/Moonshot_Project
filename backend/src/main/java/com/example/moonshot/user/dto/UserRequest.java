@@ -10,5 +10,6 @@ public class UserRequest {
     private String nickname;
     private String email;
     private String passwordHash;
+    private String platform;
     private String phone;
 }
