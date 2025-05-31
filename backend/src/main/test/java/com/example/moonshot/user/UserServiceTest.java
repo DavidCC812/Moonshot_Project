@@ -39,6 +39,7 @@ class UserServiceTest {
                 .email("user@example.com")
                 .passwordHash(passwordEncoder.encode("secret"))
                 .name("Auth User")
+                .platform("EMAIL")
                 .build());
 
         LoginRequest loginRequest = new LoginRequest();
@@ -111,6 +112,7 @@ class UserServiceTest {
                 .email("charlie@example.com")
                 .passwordHash("hash")
                 .phone("000111")
+                .platform("EMAIL")
                 .createdAt(java.time.LocalDateTime.now())
                 .updatedAt(java.time.LocalDateTime.now())
                 .build());

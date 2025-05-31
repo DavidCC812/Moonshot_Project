@@ -60,6 +60,7 @@ class SavedItineraryServiceTest {
                 .name("Test User")
                 .email("user@example.com")
                 .passwordHash(passwordEncoder.encode("secret"))
+                .platform("EMAIL")
                 .build());
 
         Country france = countryRepository.save(Country.builder()

@@ -51,6 +51,7 @@ class UserCountryAccessServiceTest {
                 .name("Alice")
                 .email("alice@example.com")
                 .passwordHash(passwordEncoder.encode("secure"))
+                .platform("EMAIL")
                 .build());
 
         france = countryRepository.save(Country.builder()

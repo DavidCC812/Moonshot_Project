@@ -61,6 +61,7 @@ class ReviewServiceTest {
                 .email("alice@example.com")
                 .passwordHash(passwordEncoder.encode("secret"))
                 .phone("123456789")
+                .platform("EMAIL")
                 .build());
 
         Country france = countryRepository.save(Country.builder()

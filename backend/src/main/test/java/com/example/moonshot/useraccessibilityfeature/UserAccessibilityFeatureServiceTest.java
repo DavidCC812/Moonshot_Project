@@ -50,6 +50,7 @@ class UserAccessibilityFeatureServiceTest {
                 .name("Inclusive Tester")
                 .email("inclusion@example.com")
                 .passwordHash(passwordEncoder.encode("test123"))
+                .platform("EMAIL")
                 .build());
 
         AccessibilityFeature feature = featureRepository.save(AccessibilityFeature.builder()
