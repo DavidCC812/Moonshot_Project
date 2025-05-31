@@ -28,10 +28,16 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
 
     private String phone;
+
+    @Column(nullable = false)
+    private String platform;
+
+    @Column(name = "oauth_token")
+    private String oauthToken;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
