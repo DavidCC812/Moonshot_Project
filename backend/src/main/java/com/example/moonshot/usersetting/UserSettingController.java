@@ -2,7 +2,6 @@ package com.example.moonshot.usersetting;
 
 import com.example.moonshot.usersetting.dto.UserSettingRequest;
 import com.example.moonshot.usersetting.dto.UserSettingResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,28 +18,32 @@ public class UserSettingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserSettingResponse>> getAllUserSettings() {
-        return ResponseEntity.ok(userSettingService.getAllUserSettings());
+    public List<UserSettingResponse> getAllUserSettings() {
+        return userSettingService.getAllUserSettings();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserSettingResponse> getUserSettingById(@PathVariable UUID id) {
-        UserSettingResponse setting = userSettingService.getUserSettingById(id);
-        if (setting == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(setting);
+    public UserSettingResponse getUserSettingById(@PathVariable UUID id) {
+        UserSetting setting = userSettingService.getUserSettingById(id);
+        return UserSettingResponse.from(setting);
     }
 
     @PostMapping
-    public ResponseEntity<UserSettingResponse> createUserSetting(@RequestBody UserSettingRequest request) {
-        UserSettingResponse created = userSettingService.createUserSetting(request);
-        return ResponseEntity.status(201).body(created);
+    public UserSettingResponse createUserSetting(@RequestBody UserSettingRequest request) {
+        UserSetting created = userSettingService.createUserSetting(request);
+        return UserSettingResponse.from(created);
+    }
+
+    @PutMapping("/{id}")
+    public UserSettingResponse updateUserSetting(
+            @PathVariable UUID id,
+            @RequestBody UserSettingRequest request) {
+        UserSetting updated = userSettingService.updateUserSetting(id, request);
+        return UserSettingResponse.from(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserSetting(@PathVariable UUID id) {
+    public void deleteUserSetting(@PathVariable UUID id) {
         userSettingService.deleteUserSetting(id);
-        return ResponseEntity.noContent().build();
     }
 }
