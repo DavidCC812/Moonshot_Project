@@ -13,9 +13,13 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.net.MalformedURLException;
+
+
+import java.net.URI;
 import java.net.URL;
+
 import java.util.Map;
 
 @Component
@@ -30,14 +34,20 @@ public class FirebaseTokenVerifier {
     private ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
 
     @PostConstruct
-    private void init() throws MalformedURLException {
-        jwtProcessor = new DefaultJWTProcessor<>();
+    private void init() {
+        try {
+            URL jwkUrl = URI.create(KEYS_URL).toURL();
+            JWKSource<SecurityContext> keySource = new RemoteJWKSet<>(jwkUrl);
 
-        JWKSource<SecurityContext> keySource = new RemoteJWKSet<>(new URL(KEYS_URL));
-        JWSKeySelector<SecurityContext> keySelector =
-                new JWSAlgorithmFamilyJWSKeySelector<>(com.nimbusds.jose.JWSAlgorithm.Family.RSA, keySource);
+            JWSKeySelector<SecurityContext> keySelector =
+                    new JWSAlgorithmFamilyJWSKeySelector<>(com.nimbusds.jose.JWSAlgorithm.Family.RSA, keySource);
 
-        jwtProcessor.setJWSKeySelector(keySelector);
+            jwtProcessor = new DefaultJWTProcessor<>();
+            jwtProcessor.setJWSKeySelector(keySelector);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error initializing FirebaseTokenVerifier", e);
+        }
     }
 
     public Map<String, Object> verify(String idToken) {
@@ -56,9 +66,12 @@ public class FirebaseTokenVerifier {
                 throw new IllegalArgumentException("Invalid Firebase token: issuer or audience mismatch");
             }
 
-            return new ObjectMapper().convertValue(claims.getClaims(), Map.class);
+            return new ObjectMapper().convertValue(
+                    claims.getClaims(),
+                    new TypeReference<Map<String, Object>>() {}
+            );
         } catch (Exception e) {
-            log.error("❌ Firebase token verification failed", e);
+            log.error(" Firebase token verification failed", e);
             throw new RuntimeException("Firebase token verification failed", e);
         }
     }
