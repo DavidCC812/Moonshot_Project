@@ -2,7 +2,6 @@ package com.example.moonshot.setting;
 
 import com.example.moonshot.setting.dto.SettingRequest;
 import com.example.moonshot.setting.dto.SettingResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,28 +18,24 @@ public class SettingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SettingResponse>> getAllSettings() {
-        return ResponseEntity.ok(settingService.getAllSettings());
+    public List<SettingResponse> getAllSettings() {
+        return settingService.getAllSettings();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SettingResponse> getSettingById(@PathVariable UUID id) {
-        SettingResponse setting = settingService.getSettingById(id);
-        if (setting == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(setting);
+    public SettingResponse getSettingById(@PathVariable UUID id) {
+        Setting setting = settingService.getSettingById(id);
+        return SettingResponse.from(setting);
     }
 
     @PostMapping
-    public ResponseEntity<SettingResponse> createSetting(@RequestBody SettingRequest request) {
-        SettingResponse created = settingService.createSetting(request);
-        return ResponseEntity.status(201).body(created);
+    public SettingResponse createSetting(@RequestBody SettingRequest request) {
+        Setting setting = settingService.createSetting(request);
+        return SettingResponse.from(setting);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSetting(@PathVariable UUID id) {
+    public void deleteSetting(@PathVariable UUID id) {
         settingService.deleteSetting(id);
-        return ResponseEntity.noContent().build();
     }
 }

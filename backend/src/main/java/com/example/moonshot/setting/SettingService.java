@@ -1,5 +1,6 @@
 package com.example.moonshot.setting;
 
+import com.example.moonshot.exception.MoonshotException;
 import com.example.moonshot.setting.dto.SettingRequest;
 import com.example.moonshot.setting.dto.SettingResponse;
 import jakarta.transaction.Transactional;
@@ -22,18 +23,17 @@ public class SettingService {
     public List<SettingResponse> getAllSettings() {
         return settingRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(SettingResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public SettingResponse getSettingById(UUID id) {
+    public Setting getSettingById(UUID id) {
         return settingRepository.findById(id)
-                .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new MoonshotException("Setting not found"));
     }
 
     @Transactional
-    public SettingResponse createSetting(SettingRequest dto) {
+    public Setting createSetting(SettingRequest dto) {
         Setting setting = Setting.builder()
                 .settingKey(dto.getSettingKey())
                 .label(dto.getLabel())
@@ -43,23 +43,10 @@ public class SettingService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        Setting saved = settingRepository.save(setting);
-        return mapToResponse(saved);
+        return settingRepository.save(setting);
     }
 
     public void deleteSetting(UUID id) {
         settingRepository.deleteById(id);
-    }
-
-    private SettingResponse mapToResponse(Setting setting) {
-        return SettingResponse.builder()
-                .id(setting.getId())
-                .settingKey(setting.getSettingKey())
-                .label(setting.getLabel())
-                .description(setting.getDescription())
-                .defaultValue(setting.isDefaultValue())
-                .createdAt(setting.getCreatedAt())
-                .updatedAt(setting.getUpdatedAt())
-                .build();
     }
 }
