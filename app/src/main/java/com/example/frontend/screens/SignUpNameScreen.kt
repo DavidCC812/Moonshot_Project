@@ -13,16 +13,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.CustomInputField
 import com.example.frontend.components.SignUpProgressBar
+import com.example.frontend.viewmodels.SignUpViewModel
 
 @Composable
-fun SignUpNameScreen(navController: NavHostController) {
-    var fullName by remember { mutableStateOf("") }
-    var nickname by remember { mutableStateOf("") }
+fun SignUpNameScreen(
+    navController: NavHostController,
+) {
+    val parentEntry = remember(navController) { navController.getBackStackEntry("signup_flow") }
+    val signUpViewModel: SignUpViewModel = viewModel(parentEntry)
+
     var fullNameError by remember { mutableStateOf(false) }
+
+    val fullName by signUpViewModel.fullName.collectAsState()
+    val nickname by signUpViewModel.nickname.collectAsState()
 
     Surface(
         modifier = Modifier
@@ -45,7 +53,7 @@ fun SignUpNameScreen(navController: NavHostController) {
         ) {
             // Progress Bar
             Spacer(modifier = Modifier.height(20.dp))
-            SignUpProgressBar(currentStep = 1, totalSteps = 6)
+            SignUpProgressBar(currentStep = 1, totalSteps = 5)
 
             // Title
             Spacer(modifier = Modifier.weight(0.5f))
@@ -60,10 +68,11 @@ fun SignUpNameScreen(navController: NavHostController) {
 
             // Inputs & Button
             Spacer(modifier = Modifier.weight(0.4f))
+
             CustomInputField(
                 value = fullName,
                 onValueChange = {
-                    fullName = it
+                    signUpViewModel.updateFullName(it)
                     fullNameError = it.isBlank()
                 },
                 label = "Full Name",
@@ -89,8 +98,8 @@ fun SignUpNameScreen(navController: NavHostController) {
             }
 
             CustomInputField(
-                value = nickname,
-                onValueChange = { nickname = it },
+                value = nickname.orEmpty(),
+                onValueChange = { signUpViewModel.updateNickname(it) },
                 label = "Nickname (Optional)",
                 isError = false,
                 keyboardType = KeyboardType.Text,
@@ -99,11 +108,22 @@ fun SignUpNameScreen(navController: NavHostController) {
             )
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            val email by signUpViewModel.email.collectAsState()
+            val phone by signUpViewModel.phone.collectAsState()
+
             CustomButton(
                 text = "Next",
                 enabled = fullName.isNotBlank(),
-                onClick = { navController.navigate("signup_phone") },
-                fontWeight = if (fullName.isNotBlank()) FontWeight.Bold else FontWeight.Medium
+                fontWeight = if (fullName.isNotBlank()) FontWeight.Bold else FontWeight.Medium,
+                onClick = {
+                    when {
+                        email.isNotBlank() && phone.isNotBlank() -> navController.navigate("signup_password")
+                        email.isNotBlank() -> navController.navigate("signup_phone")
+                        phone.isNotBlank() -> navController.navigate("signup_email")
+                        else -> navController.navigate("signup_email")
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.weight(1f))
