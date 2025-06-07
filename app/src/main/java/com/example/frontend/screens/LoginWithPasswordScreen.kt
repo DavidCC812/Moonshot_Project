@@ -13,14 +13,22 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.CustomInputField
+import com.example.frontend.viewmodels.UserViewModel
 
 @Composable
-fun LoginWithPasswordScreen(navController: NavHostController, identifier: String) {
+fun LoginWithPasswordScreen(
+    navController: NavHostController,
+    identifier: String,
+    viewModel: UserViewModel = viewModel()
+) {
     var password by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf("") }
+
+    val isLoading by viewModel.isLoading.collectAsState()
 
     Surface(
         modifier = Modifier
@@ -43,18 +51,17 @@ fun LoginWithPasswordScreen(navController: NavHostController, identifier: String
         ) {
             Spacer(modifier = Modifier.height(80.dp))
 
-            //App Logo
+            // App Logo
             Box(
                 modifier = Modifier
                     .size(160.dp)
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
-            ) {
-            }
+            ) {}
 
             Spacer(modifier = Modifier.height(140.dp))
 
-            // Identifier Field
+            // Identifier (email/phone) Field
             CustomInputField(
                 value = identifier,
                 onValueChange = {},
@@ -114,15 +121,21 @@ fun LoginWithPasswordScreen(navController: NavHostController, identifier: String
 
             // Continue Button
             CustomButton(
-                text = "Continue",
-                enabled = password.isNotEmpty(),
+                text = if (isLoading) "Checking..." else "Continue",
+                enabled = password.isNotEmpty() && !isLoading,
                 backgroundColor = if (password.isNotEmpty()) Color(0xFFB0BBC6) else Color(0xFFBCCCDC),
                 textColor = Color.Black,
                 onClick = {
                     if (password.isBlank()) {
                         passwordError = "Password is required"
                     } else {
-                        navController.navigate("home")
+                        viewModel.login(identifier, password) { success ->
+                            if (success) {
+                                navController.navigate("home")
+                            } else {
+                                passwordError = "Incorrect email/phone or password"
+                            }
+                        }
                     }
                 }
             )
