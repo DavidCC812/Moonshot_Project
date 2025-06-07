@@ -24,7 +24,7 @@ object FacebookSignInManager {
     init {
         LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
             override fun onSuccess(result: LoginResult) {
-                Log.d("FacebookSignInManager", "✅ Facebook login succeeded")
+                Log.d("FacebookSignInManager", "Facebook login succeeded")
                 handleFacebookAccessToken(result.accessToken)
             }
 
