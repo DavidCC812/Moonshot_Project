@@ -14,11 +14,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.frontend.components.SearchBar
 import com.example.frontend.components.SearchDestinationCard
-import java.text.SimpleDateFormat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.frontend.viewmodels.ItineraryViewModel
 import java.util.*
+import java.text.SimpleDateFormat
 
 @Composable
-fun SearchScreen(navController: NavHostController, viewModel: SavedItinerariesViewModel) {
+fun SearchScreen(navController: NavHostController, itineraryViewModel: ItineraryViewModel) {
     var selectedFilter by remember { mutableStateOf("All") }
     var searchQuery by remember { mutableStateOf("") }
     var dateRange by remember { mutableStateOf(getCurrentDateRange()) }
@@ -26,6 +28,7 @@ fun SearchScreen(navController: NavHostController, viewModel: SavedItinerariesVi
 
     val accessibilityFilters =
         listOf("All", "Wheelchair Accessible", "Braille Available", "Hearing Aid")
+
 
     Scaffold(
         topBar = { HomeTopBar(navController) },
@@ -75,9 +78,8 @@ fun SearchScreen(navController: NavHostController, viewModel: SavedItinerariesVi
                     SearchResultsList(
                         searchQuery,
                         selectedFilter,
-                        dateRange,
-                        viewModel,
-                        navController
+                        navController,
+                        itineraryViewModel
                     )
                 } else {
                     Text(
@@ -96,31 +98,35 @@ fun SearchScreen(navController: NavHostController, viewModel: SavedItinerariesVi
 fun SearchResultsList(
     searchQuery: String,
     selectedFilter: String,
-    dateRange: String,
-    viewModel: SavedItinerariesViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    itineraryViewModel: ItineraryViewModel
 ) {
-    val allDestinations = listOf(
-        "Eiffel Tower" to listOf("Wheelchair Accessible", "Elevator"),
-        "Louvre Museum" to listOf("Wheelchair Accessible", "Braille Available"),
-        "Notre-Dame Cathedral" to listOf("Limited Accessibility"),
-        "Versailles Palace" to listOf("Wheelchair Accessible", "Guided Tours"),
-        "Orsay Museum" to listOf("Wheelchair Accessible", "Braille Available", "Hearing Aid")
-    )
+    val itineraries by itineraryViewModel.itineraries.collectAsState()
 
-    val filteredDestinations = allDestinations
-        .filter { it.first.contains(searchQuery, ignoreCase = true) }
-        .filter { selectedFilter == "All" || it.second.contains(selectedFilter) }
+    val filteredItineraries = itineraries
+        .filter { itinerary ->
+            itinerary.title.contains(searchQuery, ignoreCase = true) ||
+                    (itinerary.destinationName?.contains(searchQuery, ignoreCase = true) == true)
+        }
+        .filter {
+            selectedFilter == "All" ||
+                    listOf("Wheelchair Accessible", "Braille Available", "Hearing Aid").contains(selectedFilter)
+        }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(filteredDestinations) { (name, tags) ->
+        items(filteredItineraries) { itinerary ->
+            val formattedRating = String.format(Locale.US, "%.1f", (itinerary.rating ?: 0f).toDouble()).toDouble()
+            val formattedPrice = itinerary.price?.toInt()?.toString() ?: "Free"
+
             SearchDestinationCard(
-                name = name,
-                rating = 4.5,
-                price = "30",
-                duration = "2 hours",
+                itineraryId = itinerary.id,
+                name = itinerary.title,
+                rating = formattedRating,
+                price = formattedPrice,
+                duration = "${itinerary.duration ?: "?"} hours",
                 people = 2,
-                accessibilityFeatures = tags,
+                imageUrl = itinerary.imageUrl,
+                accessibilityFeatures = listOf("Wheelchair Accessible", "Braille Available"),
                 navController = navController
             )
         }
