@@ -12,20 +12,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.PhoneInputField
+import com.example.frontend.viewmodels.UserViewModel
 
 @Composable
-fun PhoneScreen(navController: NavHostController) {
+fun PhoneScreen(navController: NavHostController, viewModel: UserViewModel = viewModel()) {
     var phone by remember { mutableStateOf("") }
     var phoneError by remember { mutableStateOf("") }
 
-    val registeredPhones = listOf(
-        "0630300181",
-        "0123456789",
-        "0987654321"
-    )
+    val isLoading by viewModel.isLoading.collectAsState()
 
     Surface(
         modifier = Modifier
@@ -48,7 +46,6 @@ fun PhoneScreen(navController: NavHostController) {
                 .padding(top = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Logo
             Box(
                 modifier = Modifier
                     .size(160.dp)
@@ -58,7 +55,6 @@ fun PhoneScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(210.dp))
 
-            // Phone Input Field
             PhoneInputField(
                 value = phone,
                 onValueChange = {
@@ -84,20 +80,23 @@ fun PhoneScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Continue Button
             CustomButton(
-                text = "Continue",
-                enabled = phone.isNotEmpty(),
+                text = if (isLoading) "Checking..." else "Continue",
+                enabled = phone.isNotEmpty() && !isLoading,
                 onClick = {
                     if (phone.isBlank()) {
                         phoneError = "Phone number is required"
                     } else if (!phone.matches(Regex("^\\d{10,15}\$"))) {
                         phoneError = "Enter a valid phone number"
                     } else {
-                        if (registeredPhones.contains(phone)) {
-                            navController.navigate("login_with_password/$phone")
-                        } else {
-                            navController.navigate("otp_verification/phone/$phone")
+                        val normalizedPhone = phone.filter { it.isDigit() }
+
+                        viewModel.fetchUserByPhone(normalizedPhone) { user ->
+                            if (user != null) {
+                                navController.navigate("login_with_password/${user.phone}")
+                            } else {
+                                navController.navigate("otp_verification/phone/$normalizedPhone")
+                            }
                         }
                     }
                 }
