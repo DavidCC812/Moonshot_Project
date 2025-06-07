@@ -12,17 +12,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.frontend.components.CustomButton
-import com.example.frontend.components.SignUpProgressBar
 import com.example.frontend.components.BackButton
+import com.example.frontend.components.CustomButton
 import com.example.frontend.components.PhoneInputField
-
+import com.example.frontend.components.SignUpProgressBar
+import com.example.frontend.viewmodels.SignUpViewModel
 
 @Composable
-fun SignUpPhoneScreen(navController: NavHostController) {
-    var phoneNumber by remember { mutableStateOf("") }
+fun SignUpPhoneScreen(
+    navController: NavHostController,
+) {
+
+    val parentEntry = remember(navController) { navController.getBackStackEntry("signup_flow") }
+    val signUpViewModel: SignUpViewModel = viewModel(parentEntry)
+
     var isSubmitted by remember { mutableStateOf(false) }
+
+    val phoneNumber by signUpViewModel.phone.collectAsState()
 
     Surface(
         modifier = Modifier
@@ -44,11 +52,11 @@ fun SignUpPhoneScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(20.dp))
-            SignUpProgressBar(currentStep = 2, totalSteps = 6)
+            SignUpProgressBar(currentStep = 2, totalSteps = 5)
             BackButton(navController)
 
-            // Title
             Spacer(modifier = Modifier.weight(0.5f))
+
             Text(
                 text = "Enter your phone number",
                 fontSize = 35.sp,
@@ -62,7 +70,7 @@ fun SignUpPhoneScreen(navController: NavHostController) {
 
             PhoneInputField(
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it },
+                onValueChange = { signUpViewModel.updatePhone(it) },
                 label = "Phone Number",
                 isError = isSubmitted && phoneNumber.length != 10,
             )
@@ -84,7 +92,6 @@ fun SignUpPhoneScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Next Button
             CustomButton(
                 text = "Next",
                 enabled = phoneNumber.length == 10,
@@ -95,6 +102,7 @@ fun SignUpPhoneScreen(navController: NavHostController) {
                     }
                 }
             )
+
             Spacer(modifier = Modifier.weight(1f))
         }
     }
