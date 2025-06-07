@@ -12,22 +12,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.BackButton
 import com.example.frontend.components.CustomButton
-import com.example.frontend.components.CustomChipGroup
+import com.example.frontend.components.CustomChipGrid
 import com.example.frontend.components.SignUpProgressBar
+import com.example.frontend.viewmodels.AccessibilityFeatureViewModel
+import com.example.frontend.viewmodels.SignUpViewModel
 
 @Composable
-fun SignUpAccessibilityScreen(navController: NavHostController) {
-    val options = listOf(
-        "No disabilities",
-        "Wheelchair Access",
-        "Audio Navigation",
-        "Visual Navigation"
-    )
+fun SignUpAccessibilityScreen(
+    navController: NavHostController,
+    featureViewModel: AccessibilityFeatureViewModel = viewModel(),
+) {
+    val parentEntry = remember(navController) { navController.getBackStackEntry("signup_flow") }
+    val signUpViewModel: SignUpViewModel = viewModel(parentEntry)
 
-    var selectedOptions by remember { mutableStateOf(setOf<String>()) }
+    val features by featureViewModel.features.collectAsState()
+    val isLoading by featureViewModel.isLoading.collectAsState()
+    val selectedFeatureIds by signUpViewModel.selectedAccessibilityFeatures.collectAsState()
+
+    val options = features.map { it.name }
+    val nameToIdMap = features.associateBy { it.name }
 
     Surface(
         modifier = Modifier
@@ -50,11 +57,11 @@ fun SignUpAccessibilityScreen(navController: NavHostController) {
         ) {
 
             Spacer(modifier = Modifier.height(20.dp))
-            SignUpProgressBar(currentStep = 4, totalSteps = 6)
+            SignUpProgressBar(currentStep = 4, totalSteps = 5)
             BackButton(navController)
 
-
             Spacer(modifier = Modifier.weight(0.5f))
+
             Text(
                 text = "Select Accessibility Needs",
                 fontSize = 35.sp,
@@ -64,22 +71,31 @@ fun SignUpAccessibilityScreen(navController: NavHostController) {
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
+            Spacer(modifier = Modifier.weight(0.3f))
 
-            Spacer(modifier = Modifier.weight(0.4f))
-            CustomChipGroup(
-                options = options,
-                selectedOptions = selectedOptions,
-                onSelectionChanged = { selectedOptions = it },
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.padding(top = 32.dp))
+            } else {
+                CustomChipGrid(
+                    options = options,
+                    selectedOptions = selectedFeatureIds.mapNotNull { id -> features.find { it.id == id }?.name }.toSet(),
+                    onSelectionChanged = { selectedNames ->
+                        val updatedIds = selectedNames.mapNotNull { name -> nameToIdMap[name]?.id }.toSet()
+                        signUpViewModel.updateSelectedAccessibilityFeatures(updatedIds)
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(25.dp))
 
             CustomButton(
                 text = "Next",
-                enabled = selectedOptions.isNotEmpty(),
-                onClick = { navController.navigate("signup_preferences") },
-                fontWeight = if (selectedOptions.isNotEmpty()) FontWeight.Bold else FontWeight.Medium
+                enabled = selectedFeatureIds.isNotEmpty(),
+                onClick = {
+                    navController.navigate("signup_countries")
+                },
+                fontWeight = if (selectedFeatureIds.isNotEmpty()) FontWeight.Bold else FontWeight.Medium
             )
 
             Spacer(modifier = Modifier.weight(1f))
