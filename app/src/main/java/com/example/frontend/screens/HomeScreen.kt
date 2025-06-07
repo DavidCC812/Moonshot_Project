@@ -1,5 +1,6 @@
 package com.example.frontend.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,13 +22,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Locale
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.RecommendedDestinationCard
-import com.example.frontend.components.NotificationBadge
+import com.example.frontend.viewmodels.SavedItinerariesViewModel
+import com.example.frontend.viewmodels.ItineraryViewModel
 
 @Composable
-fun HomeScreen(navController: NavHostController, viewModel: SavedItinerariesViewModel) {
+fun HomeScreen(
+    navController: NavHostController,
+    savedViewModel: SavedItinerariesViewModel,
+    itineraryViewModel: ItineraryViewModel
+) {
+
     Scaffold(
         topBar = { HomeTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "home") },
@@ -54,14 +62,11 @@ fun HomeScreen(navController: NavHostController, viewModel: SavedItinerariesView
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
             ) {
-
-                NextPlanSection(navController, viewModel)
+                NextPlanSection(navController, savedViewModel, itineraryViewModel)
                 Spacer(modifier = Modifier.height(16.dp))
 
-
-                RecommendedDestinationsSection(navController)
+                RecommendedDestinationsSection(navController, itineraryViewModel) // passed here
                 Spacer(modifier = Modifier.height(24.dp))
-
             }
         }
     }
@@ -101,7 +106,6 @@ fun HomeTopBar(navController: NavHostController) {
                             tint = Color.Black,
                             modifier = Modifier.size(28.dp)
                         )
-                        NotificationBadge(count = 1)
                     }
                 }
             }
@@ -175,8 +179,15 @@ fun BottomNavButton(
 }
 
 @Composable
-fun NextPlanSection(navController: NavHostController, viewModel: SavedItinerariesViewModel) {
-    val nextPlan = viewModel.nextPlan.value
+fun NextPlanSection(
+    navController: NavHostController,
+    savedViewModel: SavedItinerariesViewModel,
+    itineraryViewModel: ItineraryViewModel
+) {
+    val nextPlan = savedViewModel.nextPlan.collectAsState().value
+    val itinerary by itineraryViewModel
+        .getItineraryById(nextPlan?.itineraryId?.toString() ?: "")
+        .collectAsState(initial = null)
 
     Column(
         modifier = Modifier
@@ -192,7 +203,14 @@ fun NextPlanSection(navController: NavHostController, viewModel: SavedItinerarie
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        if (nextPlan == null) {
+        val resolvedItinerary = itinerary
+
+        LaunchedEffect(nextPlan) {
+            Log.d("NextPlanSection", "nextPlan: $nextPlan")
+            Log.d("NextPlanSection", "resolvedItinerary: $resolvedItinerary")
+        }
+
+        if (nextPlan == null || resolvedItinerary == null) {
             Text(
                 text = "You have no reserved plans yet.",
                 fontSize = 16.sp,
@@ -209,22 +227,38 @@ fun NextPlanSection(navController: NavHostController, viewModel: SavedItinerarie
                 modifier = Modifier.fillMaxWidth(0.85f)
             )
         } else {
+            val title = resolvedItinerary.title ?: "Untitled"
+            val location = resolvedItinerary.destinationName ?: "Coming soon"
+            val rating = resolvedItinerary.rating?.let {
+                String.format(Locale.US, "%.1f", it.toDouble()).toDouble()
+            } ?: 0.0
+            val price = resolvedItinerary.price?.toInt()?.toString() ?: "Free"
+            val duration = "${resolvedItinerary.duration ?: "?"} hours"
+
             RecommendedDestinationCard(
-                title = nextPlan.first,
-                location = nextPlan.second,
-                rating = 4.5,
-                price = "30",
-                duration = "2 hours",
+                title = title,
+                location = location,
+                rating = rating,
+                price = price,
+                duration = duration,
                 people = 2,
+                imageUrl = itinerary?.imageUrl,
                 accessibilityFeatures = listOf("Wheelchair Accessible", "Braille Available"),
-                onClick = { navController.navigate("itinerary_details/${nextPlan.first}/none") }
+                onClick = {
+                    navController.navigate("itinerary_details/${resolvedItinerary.id}")
+                }
             )
         }
     }
 }
 
 @Composable
-fun RecommendedDestinationsSection(navController: NavHostController) {
+fun RecommendedDestinationsSection(
+    navController: NavHostController,
+    viewModel: ItineraryViewModel
+) {
+    val itineraries by viewModel.itineraries.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -238,32 +272,39 @@ fun RecommendedDestinationsSection(navController: NavHostController) {
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(start = 4.dp, end = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            val recommendedDestinations = listOf(
-                Triple("Louvre Museum", "Paris, France", 4.8) to "25",
-                Triple("Orsay Museum", "Paris, France", 4.6) to "20",
-                Triple("Eiffel Tower", "Paris, France", 4.9) to "30",
-                Triple("Notre-Dame Cathedral", "Paris, France", 4.7) to "22",
-                Triple("Arc de Triomphe", "Paris, France", 4.8) to "18",
-                Triple("Palace of Versailles", "Paris, France", 4.9) to "35"
-            )
+        // Split itineraries into chunks of 3 to create rows
+        val rows = itineraries.chunked(3)
 
-            items(recommendedDestinations) { (info, price) ->
-                val (name, location, rating) = info
-                RecommendedDestinationCard(
-                    title = name,
-                    location = location,
-                    rating = rating,
-                    price = price,
-                    duration = "2 hours",
-                    people = 2,
-                    accessibilityFeatures = listOf("Wheelchair Accessible", "Braille Available"),
-                    onClick = { navController.navigate("itinerary_details/$name/none") }
-                )
+        rows.forEach { rowItineraries ->
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                contentPadding = PaddingValues(start = 4.dp, end = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(rowItineraries) { itinerary ->
+                    val formattedRating = itinerary.rating?.let {
+                        String.format(Locale.US, "%.1f", it.toDouble()).toDouble()
+                    } ?: 0.0
+
+                    val priceString = itinerary.price?.toInt()?.toString() ?: "Free"
+                    val durationText = "${itinerary.duration ?: "?"} hours"
+
+                    RecommendedDestinationCard(
+                        title = itinerary.title,
+                        location = itinerary.destinationName ?: "Coming soon",
+                        rating = formattedRating,
+                        price = priceString,
+                        duration = durationText,
+                        people = 2,
+                        imageUrl = itinerary.imageUrl,
+                        accessibilityFeatures = listOf("Wheelchair Accessible", "Braille Available"),
+                        onClick = {
+                            navController.navigate("itinerary_details/${itinerary.id}")
+                        }
+                    )
+                }
             }
         }
     }
