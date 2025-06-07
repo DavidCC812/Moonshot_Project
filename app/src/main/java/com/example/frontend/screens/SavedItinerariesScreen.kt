@@ -3,7 +3,7 @@ package com.example.frontend.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,11 +12,27 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.RecommendedDestinationCard
+import com.example.frontend.viewmodels.SavedItinerariesViewModel
+import com.example.frontend.viewmodels.ItineraryViewModel
+import java.util.Locale
 
 @Composable
-fun SavedItinerariesScreen(navController: NavHostController, viewModel: SavedItinerariesViewModel) {
+fun SavedItinerariesScreen(
+    navController: NavHostController,
+    savedViewModel: SavedItinerariesViewModel,
+    itineraryViewModel: ItineraryViewModel = viewModel()
+) {
+    val savedItineraries by savedViewModel.savedItineraries.collectAsState()
+    val itineraries by itineraryViewModel.itineraries.collectAsState()
+
+    // Explicitly fetch itineraries from backend
+    LaunchedEffect(Unit) {
+        itineraryViewModel.fetchItineraries()
+    }
+
     Scaffold(
         topBar = { HomeTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "saved_itineraries") }
@@ -33,7 +49,7 @@ fun SavedItinerariesScreen(navController: NavHostController, viewModel: SavedIti
                 .padding(horizontal = 16.dp),
             color = Color.Transparent
         ) {
-            if (viewModel.savedItineraries.isEmpty()) {
+            if (savedItineraries.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -48,73 +64,37 @@ fun SavedItinerariesScreen(navController: NavHostController, viewModel: SavedIti
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 12.dp)
+                        .padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    itemsIndexed(viewModel.savedItineraries) { index, itinerary ->
-                        val (title, location) = itinerary
+                    items(savedItineraries) { saved ->
+                        val itinerary = itineraries.find { it.id == saved.itineraryId }
 
-                        if (viewModel.savedItineraries.size == 1) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                RecommendedDestinationCard(
-                                    title = title,
-                                    location = location,
-                                    rating = 4.5,
-                                    price = "Free",
-                                    duration = "3h",
-                                    people = 2,
-                                    accessibilityFeatures = listOf(
-                                        "Wheelchair Accessible",
-                                        "Elevator Access"
-                                    ),
-                                    onClick = { navController.navigate("itinerary_details/$title/$location") },
-                                    modifier = Modifier.width(250.dp)
-                                )
-                            }
-                        } else {
-                            if (index % 2 == 0) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    RecommendedDestinationCard(
-                                        title = title,
-                                        location = location,
-                                        rating = 4.5,
-                                        price = "Free",
-                                        duration = "3h",
-                                        people = 2,
-                                        accessibilityFeatures = listOf(
-                                            "Wheelchair Accessible",
-                                            "Elevator Access"
-                                        ),
-                                        onClick = { navController.navigate("itinerary_details/$title/$location") },
-                                        modifier = Modifier.weight(1f)
-                                    )
+                        if (itinerary != null) {
+                            val title = itinerary.title ?: "Untitled"
+                            val location = itinerary.destinationName ?: "Coming soon"
+                            val rating = itinerary.rating?.let {
+                                String.format(Locale.US, "%.1f", it.toDouble()).toDouble()
+                            } ?: 0.0
+                            val price = itinerary.price?.toInt()?.toString() ?: "Free"
+                            val duration = "${itinerary.duration ?: "?"} hours"
 
-                                    if (index + 1 < viewModel.savedItineraries.size) {
-                                        val (nextTitle, nextLocation) = viewModel.savedItineraries[index + 1]
-                                        RecommendedDestinationCard(
-                                            title = nextTitle,
-                                            location = nextLocation,
-                                            rating = 4.5,
-                                            price = "Free",
-                                            duration = "3h",
-                                            people = 2,
-                                            accessibilityFeatures = listOf(
-                                                "Wheelchair Accessible",
-                                                "Elevator Access"
-                                            ),
-                                            onClick = { navController.navigate("itinerary_details/$nextTitle/$nextLocation") },
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                    } else {
-                                        Spacer(modifier = Modifier.weight(1f))
-                                    }
+                            RecommendedDestinationCard(
+                                title = title,
+                                location = location,
+                                rating = rating,
+                                price = price,
+                                duration = duration,
+                                people = 2,
+                                imageUrl = itinerary.imageUrl,
+                                accessibilityFeatures = listOf(
+                                    "Wheelchair Accessible",
+                                    "Elevator Access"
+                                ),
+                                onClick = {
+                                    navController.navigate("itinerary_details/${itinerary.id}")
                                 }
-                            }
+                            )
                         }
                     }
                 }
