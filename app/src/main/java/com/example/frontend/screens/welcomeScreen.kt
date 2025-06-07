@@ -1,5 +1,8 @@
 package com.example.frontend.screens
 
+import android.app.Activity
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,17 +18,50 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.frontend.MainActivity
 import com.example.frontend.R
+import com.example.frontend.auth.GoogleSignInManager
 import com.example.frontend.components.CustomButton
+import com.example.frontend.auth.FacebookSignInManager
 
 @Composable
-fun WelcomeScreen(navController: NavHostController) {
+fun WelcomeScreen(
+    navController: NavHostController
+) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val googleSignInManager = GoogleSignInManager(context)
+
+    val onFacebookLoginSuccess: (String) -> Unit = { idToken ->
+        Log.d("WelcomeScreen", "Facebook login success. ID Token: $idToken")
+
+        Toast.makeText(context, "Facebook token received", Toast.LENGTH_SHORT).show()
+
+        if (activity is MainActivity) {
+            Log.d("WelcomeScreen", "Calling onFacebookTokenReceived in MainActivity")
+            activity.onFacebookTokenReceived(
+                idToken,
+                onNavigateHome = {
+                    Log.d("WelcomeScreen", "Navigating to home from WelcomeScreen")
+                    navController.navigate("home") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                }
+            )
+        } else {
+            Log.e("WelcomeScreen", "Activity is not MainActivity")
+        }
+    }
+
+
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White
@@ -52,18 +88,15 @@ fun WelcomeScreen(navController: NavHostController) {
             ) {
                 Spacer(modifier = Modifier.height(80.dp))
 
-                // App Logo
                 Box(
                     modifier = Modifier
                         .size(160.dp)
                         .background(Color.LightGray),
                     contentAlignment = Alignment.Center
-                ) {
-                }
+                ) {}
 
                 Spacer(modifier = Modifier.height(120.dp))
 
-                // Login Buttons
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -85,7 +118,28 @@ fun WelcomeScreen(navController: NavHostController) {
                                 modifier = Modifier.size(24.dp)
                             )
                         },
-                        onClick = { /* Handle Google Login */ },
+
+
+                        onClick = {
+                            Log.d("WelcomeScreen", "Login with Google clicked")
+
+                            if (activity != null) {
+                                try {
+                                    googleSignInManager.beginSignIn(
+                                        activity = activity,
+                                        requestCode = 1001,
+                                        onFailure = { e ->
+                                            Log.e("WelcomeScreen", "Google Sign-In error", e)
+                                        }
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("WelcomeScreen", "Exception during sign-in", e)
+                                }
+                            } else {
+                                Log.e("WelcomeScreen", "Activity is null, cannot start Google sign-in")
+                            }
+                        },
+
                         alignIconLeft = true,
                         cornerRadius = buttonRadius,
                         buttonHeight = buttonHeight
@@ -102,7 +156,20 @@ fun WelcomeScreen(navController: NavHostController) {
                                 modifier = Modifier.size(24.dp)
                             )
                         },
-                        onClick = { /* Handle Facebook Login */ },
+                        onClick = {
+                            if (activity != null) {
+                                FacebookSignInManager.beginSignIn(
+                                    activity,
+                                    onSuccess = onFacebookLoginSuccess,
+                                    onFailure = { e ->
+                                        Log.e("WelcomeScreen", "Facebook login failed", e)
+                                    }
+                                )
+                            } else {
+                                Log.e("WelcomeScreen", "Activity is null, cannot start Facebook login")
+                            }
+                        }
+,
                         alignIconLeft = true,
                         cornerRadius = buttonRadius,
                         buttonHeight = buttonHeight
