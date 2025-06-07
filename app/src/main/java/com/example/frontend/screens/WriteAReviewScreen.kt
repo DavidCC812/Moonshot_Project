@@ -16,12 +16,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.frontend.models.ReviewRequest
+import com.example.frontend.viewmodels.ReviewViewModel
+import java.util.UUID
 
 @Composable
 fun WriteAReviewScreen(
     navController: NavHostController,
-    myReviewsViewModel: MyReviewsViewModel,
-    itineraryTitle: String
+    reviewViewModel: ReviewViewModel,
+    userId: UUID,
+    itineraryId: String
 ) {
     var userName by remember { mutableStateOf("") }
     var reviewText by remember { mutableStateOf("") }
@@ -56,7 +60,7 @@ fun WriteAReviewScreen(
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Card
+                // Review Form Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = 6.dp,
@@ -64,7 +68,8 @@ fun WriteAReviewScreen(
                     backgroundColor = Color.White
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        // Rating Section
+
+                        // Rating
                         Text("Select Rating", fontSize = 18.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
@@ -82,9 +87,10 @@ fun WriteAReviewScreen(
                                 }
                             }
                         }
+
                         Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-                        // Name Input
+                        // Name input (optional)
                         Text("Your Name (Optional)", fontSize = 18.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
@@ -100,6 +106,8 @@ fun WriteAReviewScreen(
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
+
+                        // Anonymous checkbox
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
@@ -110,9 +118,10 @@ fun WriteAReviewScreen(
                             )
                             Text("Post as Anonymous", fontSize = 16.sp, color = Color.Black)
                         }
+
                         Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-                        // Review Input
+                        // Review text input
                         Text("Write Your Review", fontSize = 18.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
@@ -122,7 +131,7 @@ fun WriteAReviewScreen(
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(140.dp), // Increased height for usability
+                                .height(140.dp),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = Color(0xFF9AA6B2),
                                 unfocusedBorderColor = Color.Gray,
@@ -149,37 +158,39 @@ fun WriteAReviewScreen(
                             return@Button
                         }
 
-                        val finalName =
-                            if (anonymous || userName.isBlank()) "Anonymous" else userName
-                        val newReview = Review(
-                            finalName.trim(),
-                            "Today",
-                            rating,
-                            reviewText.trim(),
-                            itineraryTitle
-                        )
-
-                        myReviewsViewModel.addReview(newReview)
-
-                        navController.previousBackStackEntry?.savedStateHandle?.apply {
-                            set("review_name", newReview.userName)
-                            set("review_date", newReview.date)
-                            set("review_rating", newReview.rating)
-                            set("review_text", newReview.text)
-                            set("review_itinerary", newReview.itineraryTitle)
+                        val parsedItineraryId = try {
+                            UUID.fromString(itineraryId)
+                        } catch (e: IllegalArgumentException) {
+                            errorMessage = "Invalid itinerary ID."
+                            return@Button
                         }
 
-                        errorMessage = null
-                        navController.popBackStack()
+                        val request = ReviewRequest(
+                            userId = userId,
+                            itineraryId = parsedItineraryId,
+                            rating = rating.toFloat(),
+                            comment = reviewText.trim()
+                        )
+
+                        reviewViewModel.postReview(
+                            request,
+                            onSuccess = {
+                                errorMessage = null
+                                navController.popBackStack()
+                            },
+                            onError = { error ->
+                                errorMessage = error ?: "Something went wrong while posting your review."
+                            }
+                        )
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = if (rating > 0 && reviewText.isNotBlank()) Color(
-                            0xFF9AA6B2
-                        ) else Color.Gray,
+                        backgroundColor = if (rating > 0 && reviewText.isNotBlank())
+                            Color(0xFF9AA6B2)
+                        else Color.Gray,
                         contentColor = Color.White
                     ),
                     enabled = rating > 0 && reviewText.isNotBlank()
