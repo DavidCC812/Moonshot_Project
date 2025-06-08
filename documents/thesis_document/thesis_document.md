@@ -2014,8 +2014,6 @@ The goals of the demonstration are as follows:
 
 These objectives are representative of the most important technical flows in the current implementation. Features such as review posting, accessibility tagging, or user profile updates may also be briefly illustrated if time and space allow, but they are not the primary focus of this thesis demonstration.
 
-> *Optional Placeholder: Screenshot of the test user itinerary list or login confirmation screen.*
-
 ### 10.3 Execution Flow and Screens
 
 This section presents a step-by-step walkthrough of the main application screens and usage flows, as experienced by a user interacting with the Inclusive Trip Planner. Each subsection highlights key functionality, backend interaction, and visual elements. The walkthrough is based on the current MVP state, with all features tested and functioning as expected.
@@ -2026,17 +2024,19 @@ This section presents a step-by-step walkthrough of the main application screens
 
 When the Inclusive Trip Planner app is launched, users are first presented with the **WelcomeScreen**, which serves as the authentication entry point. From this screen, users can log in using their **email address**, **phone number**, or one of the available **social login options** (Google or Facebook).
 
-> *Placeholder: Screenshot of the WelcomeScreen with login method options.*
+![Screenshots. WelcomeScreen](/documents/images/WelcomeScreen.png)
 
 ##### Login via Email or Phone
 
 Upon selecting an input method:
 
 - If the email or phone number exists in the database, the user is redirected to the **LoginWithPasswordScreen**, where they must enter the correct password associated with their account.
+
+![Screenshots. DBeaver](/documents/images/LoginWithPassword.png)
+
 - If the email or phone number is not found, the user is redirected to the **OTPVerificationScreen**. Although this screen currently acts as a placeholder, it represents the intended flow for verifying new users before registration.
 
-> *Placeholder: Screenshot of the LoginWithPasswordScreen with a stored user email.*  
-> *Placeholder: Screenshot of the OTPVerificationScreen (placeholder).*
+![Screenshots. OTPVerification](/documents/images/OTPVerificationScreen.png)
 
 This logic ensures a consistent and secure login experience. The app dynamically determines whether the user is registered and adapts the flow accordingly. If the user is new, the system initiates the **signup sequence** described in the next subsection.
 
@@ -2104,7 +2104,7 @@ At the top of the Home Screen, the app highlights the user’s **Next Plan**, wh
 
 The **Next Plan** is retrieved from memory using the `SavedItinerariesViewModel`, and is displayed using the same card component used elsewhere in the app to maintain UI consistency. If no plan has been set, the section falls back to a placeholder message encouraging the user to explore available itineraries.
 
-> *Placeholder: Screenshot of HomeScreen with the Next Plan section visible.*
+![Screenshots. HomeScreen](/documents/images/HomeScreen.png)
 
 #### Available Itineraries List
 
@@ -2119,7 +2119,7 @@ Each itinerary card includes:
 
 This structure allows users to quickly assess and compare itineraries before choosing one to explore in detail.
 
-> *Placeholder: Screenshot of HomeScreen showing the list of itinerary cards.*
+![Screenshots. ItineraryList](/documents/images/ItineraryList.png)
 
 #### Technical Notes
 
@@ -2155,7 +2155,8 @@ The interface responds dynamically to network and state changes using the associ
 
 At the bottom of the screen, the user can also navigate to write a new review or to access the detailed itinerary steps (see **Section 10.3.5**).
 
-> *Placeholder: Screenshot of ItineraryDetailsScreen showing title, tags, reviews, and save button.*
+![Screenshots. ItineraryDetails](/documents/images/ItineraryDetails.png)
+
 
 ### 10.3.5 Itinerary Steps
 
@@ -2170,7 +2171,7 @@ The screen is composed of two main sections:
 
 Tapping on a step card highlights its location on the map and expands the card to reveal additional information, such as guidance or historical context. Only one step is active at a time, allowing the user to focus on their current position or interest.
 
-> *Placeholder: Screenshot of ItineraryStepsScreen showing map and list of steps.*
+![Screenshots. ItinerarySteps](/documents/images/ItinerarySteps.png)
 
 #### Data Handling and Integration
 
@@ -2200,7 +2201,7 @@ Users can access the review form from two locations:
 - The **ItineraryDetailsScreen**, which features a clearly visible “Write a Review” button.
 - The **ProfileScreen**, where users can revisit their activity and initiate reviews for previously viewed itineraries.
 
-> *Placeholder: Screenshot of the “Write a Review” button in ItineraryDetailsScreen.*
+![Screenshots. ItineraryReviewButton](/documents/images/WriteAReviewButton.png)
 
 #### WriteAReviewScreen
 
@@ -2241,7 +2242,7 @@ All reviews for a given itinerary are rendered on the **ItineraryDetailsScreen**
 
 Reviews are displayed in a `LazyColumn`, sorted by recency, and fetched when the itinerary details are loaded. If no reviews are available, the UI shows a placeholder encouraging users to be the first to review.
 
-> *Placeholder: Screenshot of ItineraryDetailsScreen with multiple review cards.*
+![Screenshots. ItineraryDetails](/documents/images/ItineraryDetails2.png)
 
 #### Technical Notes
 
@@ -2277,7 +2278,7 @@ All bookmarked itineraries are displayed in the **SavedItinerariesScreen**, whic
 - Duration, rating, and price
 - Visual thumbnail if available
 
-> *Placeholder: Screenshot of SavedItinerariesScreen showing saved itinerary cards.*
+![Screenshots. SavedItineraries](/documents/images/SavedItinerariesScreen.png)
 
 This screen is built using Jetpack Compose and is backed by the `SavedItinerariesViewModel`, which handles state updates and synchronization with the backend.
 
@@ -2298,7 +2299,7 @@ Each saved record is stored in the `saved_itineraries` table, with a unique cons
 
 If the user has no saved itineraries, the screen displays a placeholder message suggesting that they explore the available trips in the Home or Search screen. Loading indicators and error messages are also managed through the associated ViewModel to provide clear feedback in case of connectivity issues.
 
-> *Optional Placeholder: Screenshot of SavedItinerariesScreen with empty state message.*
+>![Screenshots. SavedItinirerariesMissing](/documents/images/SavedItinerariesEmpty.png)
 
 This feature reinforces user control over their planning process and supports asynchronous exploration, allowing itineraries to be marked and revisited across sessions.
 
@@ -2318,7 +2319,7 @@ The screen is composed of the following key elements:
   - Allows quick access to the user’s submitted reviews.
   - Additional actions (e.g. bookmarks or trip history) can be added in future updates.
 
-> *Placeholder: Screenshot of ProfileScreen showing user info and preferences.*
+![Screenshots. Profile Screen](/documents/images/ProfileScreen.png)
 
 At the top-right, users can navigate to **Settings** or **Notifications**, both accessible via icon buttons in the custom top bar. These screens are not the primary focus of this demonstration but are fully implemented and accessible.
 
@@ -2357,8 +2358,6 @@ During testing, several error-handling flows were intentionally triggered to ver
 
 These fallback states are simple but effective, and help prevent dead ends or unexplained blank screens.
 
-> *Placeholder: Screenshot of login error message or itinerary fetch failure.*
-
 #### Dynamic UI Behavior
 
 The interface responds immediately to user actions, thanks to reactive ViewModel-based state management. Key examples observed during the demonstration include:
@@ -2387,7 +2386,7 @@ Special attention was given to the **readability and spacing** of interface elem
 
 Accessibility indicators on itinerary cards and detail screens also follow clear iconography, supporting at-a-glance interpretation.
 
-> *Optional Placeholder: Screenshot showing high-contrast accessibility chips or icons.*
+![Screenshots. HighContrast](/documents/images/HighContrast.png)
 
 #### Conclusion
 
