@@ -2378,8 +2378,9 @@ Compared to earlier versions, the current interface has been refined to improve 
 
 These improvements were made iteratively during development and directly enhance the user experience.
 
-> *Placeholder: Screenshot of chip layout custom image comparing old chips vs new ones
+![Screenshots. Chips](/documents/images/OldChips.png)
 
+![Screenshots. Chips](/documents/images/NewChips.png)
 #### Accessibility Considerations
 
 Special attention was given to the **readability and spacing** of interface elements related to accessibility. In the onboarding flow, each chip has a large enough touch target, with high-contrast labels and intuitive toggling behavior. Even when users select many options, the layout remains functional, though it can become visually dense with excessive selections.
