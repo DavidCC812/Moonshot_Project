@@ -753,8 +753,67 @@ Each of these flows is designed to be direct and frictionless, with loading stat
 These features are currently implemented across three primary screens:
 
 - The **Home Screen** highlights the “Next Plan” at the top and lists all available itineraries below.
+- The **Search Screen** allows users to actively search for itineraries using filters and keywords.
 - The **Itinerary Details Screen** allows users to review full content and take actions such as saving or reviewing.
 - The **Saved Itineraries Screen** serves as a personal archive, letting users revisit or replace their planned trip.
+
+**Searching for Itineraries**  
+The **Search Screen** allows users to actively explore the available itineraries using keywords, accessibility filters, and a date range. This interactive search experience complements the static browsing flow on the Home Screen by enabling more personalized and targeted discovery.
+
+When a user enters a query or selects filters, the following sequence occurs:
+
+1. **Frontend Action**: The user types in a destination name or selects an accessibility filter (e.g., “Braille Available”) or date range.
+2. **Local Filtering**: The app filters the itinerary list locally using the current `StateFlow` from the `ItineraryViewModel`. No additional backend call is made.
+3. **Result Display**: The matching itineraries are rendered using `SearchDestinationCard` composables inside a scrollable list.
+4. **UI Feedback**: If no query has been entered or no results match, the screen shows a fallback message prompting users to modify their search.
+
+This interaction is fully client-side and highly responsive, ensuring users get instant results with minimal friction.
+
+**Kotlin** – `SearchResultsList()` filtering logic and result rendering:
+
+```kotlin
+@Composable
+fun SearchResultsList(
+    searchQuery: String,
+    selectedFilter: String,
+    navController: NavHostController,
+    itineraryViewModel: ItineraryViewModel
+) {
+    val itineraries by itineraryViewModel.itineraries.collectAsState()
+
+    val filteredItineraries = itineraries
+        .filter { itinerary ->
+            itinerary.title.contains(searchQuery, ignoreCase = true) ||
+            (itinerary.destinationName?.contains(searchQuery, ignoreCase = true) == true)
+        }
+        .filter {
+            selectedFilter == "All" ||
+            listOf("Wheelchair Accessible", "Braille Available", "Hearing Aid").contains(selectedFilter)
+        }
+
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(filteredItineraries) { itinerary ->
+            val formattedRating = String.format(Locale.US, "%.1f", (itinerary.rating ?: 0f).toDouble()).toDouble()
+            val formattedPrice = itinerary.price?.toInt()?.toString() ?: "Free"
+
+            SearchDestinationCard(
+                itineraryId = itinerary.id,
+                name = itinerary.title,
+                rating = formattedRating,
+                price = formattedPrice,
+                duration = "${itinerary.duration ?: "?"} hours",
+                people = 2,
+                imageUrl = itinerary.imageUrl,
+                accessibilityFeatures = listOf("Wheelchair Accessible", "Braille Available"),
+                navController = navController
+            )
+        }
+    }
+}
+```
+The logic ensures that both destination names and titles are matched by the search query. The filtering layer is lightweight, reactive, and purely frontend-based, offering fast and flexible results without backend load.
+
+This feature reinforces inclusivity by allowing users to quickly locate itineraries that match their mobility needs, desired duration, or interests — all without leaving the screen.
 
 **Saving an Itinerary**  
 The process of saving an itinerary allows users to bookmark travel plans they are interested in revisiting or executing. This feature is central to the personalized experience of the app, enabling users to build a shortlist of accessible itineraries.
