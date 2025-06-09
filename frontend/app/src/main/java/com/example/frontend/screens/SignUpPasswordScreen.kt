@@ -13,17 +13,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.BackButton
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.CustomInputField
 import com.example.frontend.components.SignUpProgressBar
+import com.example.frontend.viewmodels.SignUpViewModel
 
 @Composable
-fun SignUpPasswordScreen(navController: NavHostController) {
-    var password by remember { mutableStateOf("") }
+fun SignUpPasswordScreen(
+    navController: NavHostController,
+) {
+    val parentEntry = remember(navController) { navController.getBackStackEntry("signup_flow") }
+    val signUpViewModel: SignUpViewModel = viewModel(parentEntry)
+
     var confirmPassword by remember { mutableStateOf("") }
     var isSubmitted by remember { mutableStateOf(false) }
+
+    val password by signUpViewModel.password.collectAsState()
 
     Surface(
         modifier = Modifier
@@ -44,13 +52,12 @@ fun SignUpPasswordScreen(navController: NavHostController) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Progress Bar
             Spacer(modifier = Modifier.height(20.dp))
-            SignUpProgressBar(currentStep = 3, totalSteps = 6)
+            SignUpProgressBar(currentStep = 3, totalSteps = 5)
             BackButton(navController)
 
-            // Title
             Spacer(modifier = Modifier.weight(0.5f))
+
             Text(
                 text = "Create Your Password",
                 fontSize = 35.sp,
@@ -61,10 +68,10 @@ fun SignUpPasswordScreen(navController: NavHostController) {
             )
 
             Spacer(modifier = Modifier.weight(0.4f))
-            // Password Input Field
+
             CustomInputField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { signUpViewModel.updatePassword(it) },
                 label = "Password",
                 isError = isSubmitted && (password.length < 6 || !password.any { it.isDigit() }),
                 keyboardType = KeyboardType.Password,

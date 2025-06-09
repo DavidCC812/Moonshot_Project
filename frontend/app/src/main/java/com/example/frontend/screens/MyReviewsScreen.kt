@@ -16,10 +16,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.frontend.viewmodels.MyReviewsViewModel
+
+
 
 @Composable
 fun MyReviewsScreen(navController: NavHostController, myReviewsViewModel: MyReviewsViewModel) {
-    val myReviews by remember { mutableStateOf(myReviewsViewModel.myReviews) }
+    val myReviews = myReviewsViewModel.myReviews
 
     Scaffold(
         topBar = { HomeTopBar(navController) },

@@ -97,3 +97,38 @@ fun NotificationBadge(count: Int) {
         }
     }
 }
+
+@Composable
+fun SettingsActionButton(
+    text: String,
+    onClick: () -> Unit,
+    backgroundColor: Color = Color(0xFF9AA6B2),
+    contentColor: Color = Color.Black,
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = 8.dp)
+        .height(36.dp),
+    icon: (@Composable () -> Unit)? = null
+) {
+    androidx.compose.material.Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(10.dp),
+        colors = androidx.compose.material.ButtonDefaults.buttonColors(
+            backgroundColor = backgroundColor,
+            contentColor = contentColor
+        ),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+    ) {
+        if (icon != null) {
+            icon()
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        Text(
+            text,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = contentColor
+        )
+    }
+}

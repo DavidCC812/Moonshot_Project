@@ -1,5 +1,6 @@
 package com.example.frontend.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,9 +15,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
-
+import com.example.frontend.viewmodels.SignUpViewModel
 
 @Composable
 fun OTPVerificationScreen(
@@ -27,32 +29,36 @@ fun OTPVerificationScreen(
     var otpValues by remember { mutableStateOf(List(6) { "" }) }
     var otpError by remember { mutableStateOf("") }
 
+    val parentEntry = remember(navController) {
+        try {
+            navController.getBackStackEntry("signup_flow")
+        } catch (e: Exception) {
+            null
+        }
+    }
+    val signUpViewModel: SignUpViewModel? = parentEntry?.let { viewModel(it) }
+
+    LaunchedEffect(Unit) {
+        signUpViewModel?.email?.value?.let {
+            Log.d("OTPVerification", "SignUpViewModel email on load: $it")
+        }
+    }
+
+
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFF8FAFC),
-                        Color(0xFFD9EAFD),
-                        Color(0xFFBCCCDC)
-                    )
-                )
+        modifier = Modifier.fillMaxSize().background(
+            Brush.verticalGradient(
+                colors = listOf(Color(0xFFF8FAFC), Color(0xFFD9EAFD), Color(0xFFBCCCDC))
             )
-            .padding(horizontal = 24.dp),
+        ).padding(horizontal = 24.dp),
         color = Color.Transparent
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 80.dp),
+            modifier = Modifier.fillMaxSize().padding(top = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Logo
             Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .background(Color.LightGray),
+                modifier = Modifier.size(160.dp).background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {}
 
@@ -78,7 +84,6 @@ fun OTPVerificationScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // OTP Input Fields
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -91,9 +96,7 @@ fun OTPVerificationScreen(
                                 otpValues.toMutableList().apply { this[index] = it }
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .width(50.dp)
-                            .height(60.dp),
+                        modifier = Modifier.width(50.dp).height(60.dp),
                         textStyle = LocalTextStyle.current.copy(
                             fontSize = 22.sp,
                             textAlign = TextAlign.Center
@@ -108,7 +111,22 @@ fun OTPVerificationScreen(
             CustomButton(
                 text = "Verify",
                 enabled = otpValues.all { it.isNotEmpty() },
-                onClick = { navController.navigate("signup_name") })
+                onClick = {
+                    when (verificationType) {
+                        "email" -> {
+                            signUpViewModel?.updateEmail(identifier)
+                            Log.d("OTPVerification", "Email set to: ${signUpViewModel?.email?.value}")
+                        }
+                        "phone" -> {
+                            signUpViewModel?.updatePhone(identifier)
+                            Log.d("OTPVerification", "Phone set to: ${signUpViewModel?.phone?.value}")
+                        }
+                    }
+                    navController.navigate("signup_name") {
+                        popUpTo("signup_flow") { inclusive = false }
+                    }
+                }
+            )
         }
     }
 }

@@ -5,9 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.frontend.viewmodels.SettingsViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.frontend.components.CustomInputField
+import com.example.frontend.components.SettingsActionButton
+import com.example.frontend.viewmodels.ProfileViewModel
 
 @Composable
 fun SettingsScreen(navController: NavHostController, profileViewModel: ProfileViewModel) {
@@ -27,10 +34,23 @@ fun SettingsScreen(navController: NavHostController, profileViewModel: ProfileVi
     var email by remember { mutableStateOf(profileViewModel.email.value) }
     var phone by remember { mutableStateOf(profileViewModel.phone.value) }
     var accessibility by remember { mutableStateOf(profileViewModel.accessibility.value) }
-    var isProfilePublic by remember { mutableStateOf(true) }
-    var showSavedItineraries by remember { mutableStateOf(true) }
-    var isTwoFactorEnabled by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return SettingsViewModel(profileViewModel.userId.value.toString()) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+    )
+    val settings by settingsViewModel.settings.collectAsState()
+    val isLoading by settingsViewModel.isLoading.collectAsState()
+    val error by settingsViewModel.error.collectAsState()
+
 
     Scaffold(
         topBar = { SettingsTopBar(navController) }
@@ -62,26 +82,54 @@ fun SettingsScreen(navController: NavHostController, profileViewModel: ProfileVi
                 onPhoneChange = { phone = it },
                 onAccessibilityChange = { accessibility = it }
             )
+
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-            SettingToggleItem(
-                "Profile Visibility",
-                if (isProfilePublic) "Public" else "Private",
-                isProfilePublic
-            ) { isProfilePublic = it }
-            SettingToggleItem(
-                "Show Saved Itineraries",
-                if (showSavedItineraries) "Visible to others" else "Hidden",
-                showSavedItineraries
-            ) { showSavedItineraries = it }
-            SettingButtonItem("Change Password") { navController.navigate("change_password") }
-            SettingToggleItem(
-                "Enable Two-Factor Authentication",
-                if (isTwoFactorEnabled) "Enabled" else "Disabled",
-                isTwoFactorEnabled
-            ) { isTwoFactorEnabled = it }
-            SettingButtonItem("Privacy Policy") { navController.navigate("privacy_policy") }
-            SettingButtonItem("Delete Account", isDestructive = true) { showDeleteDialog = true }
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else {
+                settings.forEach { setting ->
+                    SettingToggleItem(
+                        title = setting.label,
+                        description = if (setting.value) "Enabled" else "Disabled",
+                        isChecked = setting.value,
+                        onCheckedChange = {
+                            settingsViewModel.postUserSetting(setting.settingId, it)
+                        }
+                    )
+                }
+            }
+
+            SettingsActionButton(
+                text = "Change Password",
+                onClick = { navController.navigate("change_password") }
+            )
+
+            SettingsActionButton(
+                text = "Privacy Policy",
+                onClick = { navController.navigate("privacy_policy") }
+            )
+
+            SettingsActionButton(
+                text = "Logout",
+                onClick = { navController.navigate("welcome") },
+                backgroundColor = Color(0xFFD32F2F),
+                contentColor = Color.White,
+                icon = {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Logout",
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            )
+
+            SettingsActionButton(
+                text = "Delete Account",
+                onClick = { showDeleteDialog = true },
+                backgroundColor = Color(0xFFD32F2F),
+                contentColor = Color.White
+            )
         }
     }
 
@@ -168,22 +216,6 @@ fun SettingToggleItem(
         Switch(checked = isChecked, onCheckedChange = onCheckedChange)
     }
     Divider(color = Color.LightGray, thickness = 1.dp)
-}
-
-@Composable
-fun SettingButtonItem(title: String, isDestructive: Boolean = false, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (isDestructive) Color(0xFFD32F2F) else Color(0xFF9AA6B2),
-            contentColor = Color.Black
-        )
-    ) {
-        Text(title, fontSize = 16.sp)
-    }
 }
 
 @Composable

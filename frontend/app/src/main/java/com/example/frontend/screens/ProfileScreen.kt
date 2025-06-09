@@ -7,6 +7,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,15 +19,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
-import com.example.frontend.components.NotificationBadge
+import com.example.frontend.components.CustomChipGrid
+import com.example.frontend.viewmodels.UserViewModel
+import com.example.frontend.viewmodels.AccessibilityFeatureViewModel
+
 
 @Composable
-fun ProfileScreen(navController: NavHostController, profileViewModel: ProfileViewModel) {
+fun ProfileScreen(navController: NavHostController) {
+    val userViewModel: UserViewModel = viewModel()
+    val user by userViewModel.user.collectAsState()
+
+    val accessibilityFeatureViewModel: AccessibilityFeatureViewModel = viewModel()
+    val selectedLabels by accessibilityFeatureViewModel.selectedLabels.collectAsState()
+
+    LaunchedEffect(user?.id) {
+        userViewModel.loadUserFromToken()
+        user?.id?.let {
+            accessibilityFeatureViewModel.fetchUserFeatures(it)
+        }
+    }
+
     Scaffold(
         topBar = { ProfileTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "profile") }
@@ -52,7 +68,7 @@ fun ProfileScreen(navController: NavHostController, profileViewModel: ProfileVie
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProfileHeader(profileViewModel)
+                ProfileHeader(user?.name ?: "Loading...")
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -61,16 +77,17 @@ fun ProfileScreen(navController: NavHostController, profileViewModel: ProfileVie
                     backgroundColor = Color.White
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        AccountDetails(profileViewModel)
+                        AccountDetails(
+                            email = user?.email ?: "–",
+                            phone = user?.phone ?: "–",
+                            accessibilityChips = selectedLabels
+                        )
                         Divider(modifier = Modifier.padding(vertical = 8.dp))
-
                         ActivitySection(navController)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                LogoutButton(navController)
             }
         }
     }
@@ -90,39 +107,20 @@ fun ProfileTopBar(navController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.weight(1f))
-
             Text(
                 text = "App Logo",
                 fontSize = 18.sp,
                 color = Color.Black,
                 modifier = Modifier.weight(1f)
             )
-
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Notifications Icon
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { navController.navigate("notifications") }) {
                     Box(contentAlignment = Alignment.TopEnd) {
-                        Icon(
-                            imageVector = Icons.Filled.Notifications,
-                            contentDescription = "Notifications",
-                            tint = Color.Black,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        NotificationBadge(count = 1)
+                        Icon(Icons.Filled.Notifications, contentDescription = "Notifications", tint = Color.Black, modifier = Modifier.size(28.dp))
                     }
                 }
-
-                // Settings Icon
                 IconButton(onClick = { navController.navigate("settings") }) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = "Settings",
-                        tint = Color.Black,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings", tint = Color.Black, modifier = Modifier.size(28.dp))
                 }
             }
         }
@@ -130,7 +128,7 @@ fun ProfileTopBar(navController: NavHostController) {
 }
 
 @Composable
-fun ProfileHeader(profileViewModel: ProfileViewModel) {
+fun ProfileHeader(name: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,46 +137,48 @@ fun ProfileHeader(profileViewModel: ProfileViewModel) {
     ) {
         Box(
             modifier = Modifier
-                .size(90.dp)
+                .size(150.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
         )
-
         Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = profileViewModel.name.value,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
+        Text(text = name, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Text(text = "Traveler & Explorer", fontSize = 14.sp, color = Color.LightGray)
     }
 }
 
 @Composable
-fun AccountDetails(profileViewModel: ProfileViewModel) {
+fun AccountDetails(
+    email: String,
+    phone: String,
+    accessibilityChips: List<String>
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            "Account Information",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
+        Text("Account Information", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        ProfileInfoItem(label = "Email", value = email, showDivider = true)
+        ProfileInfoItem(label = "Phone", value = phone, showDivider = true)
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val profileItems = listOf(
-            "Email" to profileViewModel.email.value,
-            "Phone" to profileViewModel.phone.value,
-            "Accessibility Preferences" to profileViewModel.accessibility.value
-        )
+        Text("Accessibility Preferences", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
 
-        profileItems.forEachIndexed { index, (label, value) ->
-            ProfileInfoItem(label, value, showDivider = index < profileItems.lastIndex)
+        if (accessibilityChips.isEmpty()) {
+            Text("None", fontSize = 16.sp, color = Color.Black)
+        } else {
+            CustomChipGrid(
+                options = accessibilityChips,
+                selectedOptions = accessibilityChips.toSet(),
+                onSelectionChanged = {}, // read-only
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
+
+        Divider(modifier = Modifier.padding(vertical = 8.dp), thickness = 1.dp, color = Color.LightGray)
     }
 }
+
 
 @Composable
 fun ProfileInfoItem(label: String, value: String, showDivider: Boolean) {
@@ -186,11 +186,7 @@ fun ProfileInfoItem(label: String, value: String, showDivider: Boolean) {
         Text(text = label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
         Text(text = value, fontSize = 16.sp, color = Color.Black)
         if (showDivider) {
-            Divider(
-                modifier = Modifier.padding(vertical = 4.dp),
-                thickness = 1.dp,
-                color = Color.LightGray
-            )
+            Divider(modifier = Modifier.padding(vertical = 4.dp), thickness = 1.dp, color = Color.LightGray)
         }
     }
 }
@@ -199,9 +195,7 @@ fun ProfileInfoItem(label: String, value: String, showDivider: Boolean) {
 fun ActivitySection(navController: NavHostController) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text("My Activity", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-
         Spacer(modifier = Modifier.height(8.dp))
-
         ActivityItem("Reviews", onClick = { navController.navigate("my_reviews") })
     }
 }
@@ -214,35 +208,8 @@ fun ActivityItem(title: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFF9AA6B2),
-            contentColor = Color.Black
-        )
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF9AA6B2), contentColor = Color.Black)
     ) {
         Text(title, fontSize = 16.sp)
-    }
-}
-
-@Composable
-fun LogoutButton(navController: NavHostController) {
-    Button(
-        onClick = { navController.navigate("welcome") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(45.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Red,
-            contentColor = Color.White
-        )
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-            contentDescription = "Logout",
-            modifier = Modifier.size(28.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text("Logout", fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }
 }

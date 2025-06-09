@@ -1,5 +1,6 @@
 package com.example.frontend.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -12,53 +13,54 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.CustomButton
 import com.example.frontend.components.CustomInputField
+import com.example.frontend.viewmodels.SignUpViewModel
+import com.example.frontend.viewmodels.UserViewModel
 
 @Composable
-fun EmailScreen(navController: NavHostController) {
+fun EmailScreen(navController: NavHostController, viewModel: UserViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf("") }
 
-    val registeredEmails = listOf(
-        "davidcc812@gmail.com",
-        "example@example.com",
-        "frontend@mock.com"
-    )
+    val parentEntry = remember(navController) {
+        try {
+            navController.getBackStackEntry("signup_flow")
+        } catch (e: Exception) {
+            null
+        }
+    }
+    val signUpViewModel: SignUpViewModel? = parentEntry?.let { viewModel(it) }
+
+    LaunchedEffect(Unit) {
+        signUpViewModel?.email?.value?.let {
+            Log.d("EmailScreen", "SignUpViewModel already has email: $it")
+        }
+    }
+
+    val isLoading by viewModel.isLoading.collectAsState()
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFF8FAFC),
-                        Color(0xFFD9EAFD),
-                        Color(0xFFBCCCDC)
-                    )
-                )
+        modifier = Modifier.fillMaxSize().background(
+            Brush.verticalGradient(
+                listOf(Color(0xFFF8FAFC), Color(0xFFD9EAFD), Color(0xFFBCCCDC))
             )
-            .padding(horizontal = 24.dp),
+        ).padding(horizontal = 24.dp),
         color = Color.Transparent
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 80.dp),
+            modifier = Modifier.fillMaxSize().padding(top = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Logo
             Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .background(Color.LightGray),
+                modifier = Modifier.size(160.dp).background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {}
 
             Spacer(modifier = Modifier.height(210.dp))
 
-            // Input Field
             CustomInputField(
                 value = email,
                 onValueChange = {
@@ -76,33 +78,35 @@ fun EmailScreen(navController: NavHostController) {
                     text = emailError,
                     color = Color.Red,
                     fontSize = 14.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp, bottom = 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 10.dp),
                     textAlign = TextAlign.Start
                 )
             } else {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Continue Button
             CustomButton(
-                text = "Continue",
-                enabled = email.isNotEmpty(),
+                text = if (isLoading) "Checking..." else "Continue",
+                enabled = email.isNotEmpty() && !isLoading,
                 onClick = {
                     if (email.isBlank()) {
                         emailError = "Email is required"
                     } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                         emailError = "Enter a valid email address"
                     } else {
-                        if (registeredEmails.contains(email)) {
-                            navController.navigate("login_with_password/$email")
-                        } else {
-                            navController.navigate("otp_verification/email/$email")
+                        viewModel.fetchUserByEmail(email) { user ->
+                            if (user != null) {
+                                navController.navigate("login_with_password/${user.email}")
+                            } else {
+                                signUpViewModel?.updateEmail(email)
+                                Log.d("EmailScreen", "Email passed to signup flow: $email")
+                                navController.navigate("otp_verification/email/$email")
+                            }
                         }
                     }
                 }
             )
+
             Spacer(modifier = Modifier.height(50.dp))
         }
     }

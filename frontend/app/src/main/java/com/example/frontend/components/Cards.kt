@@ -25,6 +25,12 @@ import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material3.CardDefaults
 import androidx.navigation.NavHostController
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import coil.compose.rememberAsyncImagePainter
+import java.util.UUID
+
 
 @Composable
 fun RecommendedDestinationCard(
@@ -34,6 +40,7 @@ fun RecommendedDestinationCard(
     price: String,
     duration: String,
     people: Int,
+    imageUrl: String?,
     accessibilityFeatures: List<String>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -56,18 +63,27 @@ fun RecommendedDestinationCard(
                 .fillMaxWidth()
                 .padding(12.dp)
         ) {
+            val painter = rememberAsyncImagePainter(imageUrl ?: "")
+
+            // Image container
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
-                    .background(Color.Gray),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.LightGray)
             ) {
-                Text("Image Placeholder", color = Color.White, fontSize = 14.sp)
+                Image(
+                    painter = painter,
+                    contentDescription = "Itinerary Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Title + location + rating row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -103,6 +119,7 @@ fun RecommendedDestinationCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Duration + people row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -128,6 +145,7 @@ fun RecommendedDestinationCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Toggleable accessibility features section
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,11 +189,13 @@ fun RecommendedDestinationCard(
 
 @Composable
 fun SearchDestinationCard(
+    itineraryId: UUID,
     name: String,
     rating: Double,
     price: String,
     duration: String,
     people: Int,
+    imageUrl: String?,
     accessibilityFeatures: List<String>,
     navController: NavHostController
 ) {
@@ -184,18 +204,29 @@ fun SearchDestinationCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp, horizontal = 12.dp)
-            .clickable { navController.navigate("itinerary_details/$name/none") },
+            .clickable { navController.navigate("itinerary_details/$itineraryId") },
         elevation = 4.dp
     ) {
         Box(
             modifier = Modifier.padding(12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                val painter = rememberAsyncImagePainter(imageUrl ?: "")
+
                 Box(
                     modifier = Modifier
                         .size(60.dp)
-                        .background(Color.Gray, shape = RoundedCornerShape(8.dp))
-                )
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.LightGray)
+                ) {
+                    Image(
+                        painter = painter,
+                        contentDescription = "Itinerary Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.width(12.dp))
 

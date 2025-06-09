@@ -1,10 +1,11 @@
 package com.example.frontend.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import com.example.frontend.models.Review
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -14,7 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -25,46 +26,99 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.compose.ui.text.buildAnnotatedString
+import com.example.frontend.models.Itinerary
+import com.example.frontend.models.ItineraryAccessibility
+import com.example.frontend.viewmodels.SavedItinerariesViewModel
+import com.example.frontend.viewmodels.ItineraryAccessibilityViewModel
+import com.example.frontend.viewmodels.ItineraryViewModel
+import com.example.frontend.viewmodels.ReviewViewModel
 import kotlinx.coroutines.launch
+import java.util.UUID
+import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
+
 
 @Composable
 fun ItineraryDetailsScreen(
     navController: NavHostController,
-    itineraryTitle: String,
-    viewModel: SavedItinerariesViewModel
+    itineraryId: String,
+    savedViewModel: SavedItinerariesViewModel,
+    itineraryViewModel: ItineraryViewModel
 ) {
-    var reviews by rememberSaveable {
-        mutableStateOf(
-            listOf(
-                Review(
-                    "Alice Johnson",
-                    "January 5, 2024",
-                    5,
-                    "Amazing experience!",
-                    itineraryTitle
-                ),
-                Review(
-                    "Mark Smith",
-                    "December 20, 2023",
-                    4,
-                    "Great itinerary, but could use more accessibility details.",
-                    itineraryTitle
-                ),
-                Review(
-                    "Emily Brown",
-                    "December 10, 2023",
-                    3,
-                    "Good, but some places were not as accessible as advertised.",
-                    itineraryTitle
-                )
-            )
-        )
+
+    val allItineraries by itineraryViewModel.itineraries.collectAsState()
+
+    LaunchedEffect(itineraryId) {
+        Log.d("ItineraryDetails", "Checking for itinerary: $itineraryId")
+        itineraryViewModel.fetchItineraries()
     }
 
-    val isSaved =
-        remember { mutableStateOf(viewModel.savedItineraries.any { it.first == itineraryTitle }) }
+    LaunchedEffect(allItineraries) {
+        Log.d("ItineraryDetails", "Available itineraries (${allItineraries.size}):")
+        allItineraries.forEach {
+            Log.d("ItineraryDetails", "- ${it.id} → ${it.title}")
+        }
+    }
+
+
+    val reviewViewModel: ReviewViewModel = viewModel()
+    val accessibilityViewModel: ItineraryAccessibilityViewModel = viewModel()
+
+    val itinerary by remember(allItineraries, itineraryId) {
+        derivedStateOf {
+            allItineraries.find { it.id.toString() == itineraryId }
+        }
+    }
+
+    val savedItineraries by savedViewModel.savedItineraries.collectAsState()
+    val isSaved = remember(itinerary?.id, savedItineraries) {
+        savedItineraries.any { it.itineraryId == itinerary?.id }
+    }
+
+    LaunchedEffect(Unit) {
+        reviewViewModel.fetchAllReviews()
+    }
+
+    val allReviews by reviewViewModel.reviews.collectAsState()
+
+    LaunchedEffect(allReviews) {
+        Log.d("ItineraryDetails", "Fetched ${allReviews.size} reviews")
+    }
+
+    LaunchedEffect(itinerary) {
+        Log.d("ItineraryDetails", "Current itinerary ID: ${itinerary?.id}")
+    }
+
+
+    LaunchedEffect(allReviews) {
+        allReviews.forEach { review ->
+            Log.d("ItineraryDetails", "Review: id=${review.id}, itineraryId=${review.itineraryId}")
+        }
+    }
+
+
+    val filteredReviews = itinerary?.id?.toString()?.let { id ->
+        allReviews.filter { it.itineraryId?.toString() == id }
+    } ?: emptyList()
+
+
+    LaunchedEffect(filteredReviews) {
+        Log.d("ItineraryDetails", "Filtered reviews count: ${filteredReviews.size}")
+    }
+
+
+    val accessibilityLinks by accessibilityViewModel.accessibilityLinks.collectAsState()
+    val featureLabels = mapOf(
+        UUID.fromString("00000000-0000-0000-0000-000000000001") to "Wheelchair Accessible ✅",
+        UUID.fromString("00000000-0000-0000-0000-000000000002") to "Hearing Aid Support ✅",
+        UUID.fromString("00000000-0000-0000-0000-000000000003") to "Elevator ❌"
+    )
+
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -78,11 +132,7 @@ fun ItineraryDetailsScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFF8FAFC),
-                            Color(0xFFD9EAFD),
-                            Color(0xFFBCCCDC)
-                        )
+                        colors = listOf(Color(0xFFF8FAFC), Color(0xFFD9EAFD), Color(0xFFBCCCDC))
                     )
                 )
                 .padding(padding)
@@ -103,32 +153,34 @@ fun ItineraryDetailsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = itineraryTitle,
+                                text = itinerary?.title ?: "Loading...",
                                 fontSize = 26.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black,
                                 modifier = Modifier.weight(1f)
                             )
 
+                            itinerary?.id?.let {
+                                Log.d("ItineraryDetails", "Bookmark clicked for $it")
+                            }
+
                             IconButton(
                                 onClick = {
-                                    if (isSaved.value) {
-                                        viewModel.removeItinerary(itineraryTitle to "Paris")
-                                        isSaved.value = false
+                                    itinerary?.id?.let { id ->
                                         coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("Removed from Saved Itineraries")
-                                        }
-                                    } else {
-                                        viewModel.saveItinerary(itineraryTitle to "Paris")
-                                        isSaved.value = true
-                                        coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("Saved to Itineraries")
+                                            if (isSaved) {
+                                                savedViewModel.removeItinerary(id)
+                                                snackbarHostState.showSnackbar("Removed from Saved Itineraries")
+                                            } else {
+                                                savedViewModel.saveItinerary(id)
+                                                snackbarHostState.showSnackbar("Saved to Itineraries")
+                                            }
                                         }
                                     }
                                 }
                             ) {
                                 Icon(
-                                    imageVector = if (isSaved.value) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                                     contentDescription = "Save Itinerary",
                                     tint = Color.Black
                                 )
@@ -137,15 +189,23 @@ fun ItineraryDetailsScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
+                        val painter = rememberAsyncImagePainter(itinerary?.imageUrl ?: "")
+
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
-                                .background(Color.LightGray),
-                            contentAlignment = Alignment.Center
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.LightGray)
                         ) {
-                            Text("Map/Image Placeholder", fontSize = 16.sp, color = Color.Gray)
+                            Image(
+                                painter = painter,
+                                contentDescription = "Itinerary Image",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
                         }
+
 
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -178,12 +238,23 @@ fun ItineraryDetailsScreen(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
+                        val itineraryIdToSet = itinerary?.id
 
                         Button(
                             onClick = {
-                                viewModel.setAsNextPlan(itineraryTitle to "Paris")
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("Set as Next Plan")
+                                itineraryIdToSet?.let { id ->
+                                    savedViewModel.setAsNextPlan(id)
+                                    coroutineScope.launch {
+                                        if (isSaved) {
+                                            snackbarHostState.showSnackbar("Set as Next Plan")
+                                        } else {
+                                            snackbarHostState.showSnackbar("Set as Next Plan (not saved)")
+                                        }
+                                    }
+                                } ?: run {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("Unable to set plan: Itinerary not loaded")
+                                    }
                                 }
                             },
                             modifier = Modifier
@@ -200,8 +271,13 @@ fun ItineraryDetailsScreen(
                     }
                 }
 
-                item { AccessibilityInfo() }
-                item { DetailsNavigationRow(navController, itineraryTitle) }
+                item {
+                    AccessibilityOverviewSection(accessibilityLinks, featureLabels)
+                }
+
+                item {
+                    DetailsNavigationRow(navController, itinerary)
+                }
 
                 item {
                     Column(modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)) {
@@ -212,9 +288,18 @@ fun ItineraryDetailsScreen(
                             color = Color.Black,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
+                    }
+                }
 
+                items(filteredReviews, key = { it.id }) { review ->
+                    Log.d("ItineraryDetails", "Rendering review for itinerary ${review.itineraryId}")
+                    ReviewCard(review, navController, showItineraryButton = false)
+                }
+
+                item {
+                    itinerary?.id?.let { id ->
                         Button(
-                            onClick = { navController.navigate("write_review/$itineraryTitle") },
+                            onClick = { navController.navigate("write_review/$id") },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
@@ -235,10 +320,6 @@ fun ItineraryDetailsScreen(
                         }
                     }
                 }
-
-                items(reviews) { review ->
-                    ReviewCard(review, navController, showItineraryButton = false)
-                }
             }
         }
     }
@@ -251,7 +332,10 @@ fun AnnotatedString.Builder.boldText(text: String) {
 }
 
 @Composable
-fun AccessibilityInfo() {
+fun AccessibilityOverviewSection(
+    accessibilityLinks: List<ItineraryAccessibility>,
+    featureLabels: Map<UUID, String>
+) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Row(
@@ -281,9 +365,12 @@ fun AccessibilityInfo() {
                 .padding(top = 4.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AccessibilityTag("Wheelchair Accessible ✅", Color(0xFFDFF6DD))
-            AccessibilityTag("Hearing Aid Support ✅", Color(0xFFDFF6DD))
-            AccessibilityTag("Elevator ❌", Color(0xFFFFD6D6))
+            accessibilityLinks.forEach { link ->
+                val label = featureLabels[link.featureId] ?: "Unknown Feature"
+                val backgroundColor =
+                    if (label.contains("✅")) Color(0xFFDFF6DD) else Color(0xFFFFD6D6)
+                AccessibilityTag(label, backgroundColor)
+            }
         }
     }
 }
@@ -313,11 +400,15 @@ fun AccessibilityTag(label: String, backgroundColor: Color) {
 }
 
 @Composable
-fun DetailsNavigationRow(navController: NavHostController, itineraryTitle: String) {
+fun DetailsNavigationRow(navController: NavHostController, itinerary: Itinerary?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { navController.navigate("itinerary_steps/$itineraryTitle") }
+            .clickable {
+                itinerary?.id?.let {
+                    navController.navigate("itinerary_steps/$it")
+                }
+            }
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -335,6 +426,7 @@ fun DetailsNavigationRow(navController: NavHostController, itineraryTitle: Strin
     }
 }
 
+
 @Composable
 fun ReviewCard(review: Review, navController: NavHostController, showItineraryButton: Boolean) {
     Card(
@@ -345,80 +437,57 @@ fun ReviewCard(review: Review, navController: NavHostController, showItineraryBu
         shape = RoundedCornerShape(12.dp),
         backgroundColor = Color.White
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = review.userName,
+                    "Anonymous",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
-                Text(
-                    text = review.date,
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
+                Text(review.createdAt, fontSize = 14.sp, color = Color.Gray)
             }
-
             Spacer(modifier = Modifier.height(6.dp))
-
-            // Star Rating
             Row {
-                repeat(review.rating) {
+                repeat(review.rating.toInt()) {
                     Icon(
-                        imageVector = Icons.Filled.Star,
+                        Icons.Filled.Star,
                         contentDescription = "Star",
                         tint = Color(0xFFFFD700),
                         modifier = Modifier.size(18.dp)
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-
-            // Review Text
-            Text(
-                text = review.text,
-                fontSize = 14.sp,
-                color = Color.DarkGray
-            )
-
+            Text(review.comment, fontSize = 14.sp, color = Color.DarkGray)
             Spacer(modifier = Modifier.height(8.dp))
-
             Divider(color = Color.LightGray, thickness = 1.dp)
-
             Spacer(modifier = Modifier.height(8.dp))
-
             if (showItineraryButton) {
-                Button(
-                    onClick = {
-                        navController.navigate("itinerary_details/${review.itineraryTitle}/Next Stop Placeholder")
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFF9AA6B2),
-                        contentColor = Color.Black
-                    )
-                ) {
-                    Text("View Itinerary", fontSize = 16.sp)
+                if (review.itineraryId != null) {
+                    Button(
+                        onClick = {
+                            Log.d("ReviewCard", "Navigating to itinerary ID: ${review.itineraryId}")
+                            navController.navigate("itinerary_details/${review.itineraryId}")
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color(0xFF9AA6B2),
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("View Itinerary", fontSize = 16.sp)
+                    }
+                } else {
+                    Log.w("ReviewCard", "itineraryId is null — cannot navigate to details screen")
                 }
             }
         }
     }
 }
-
-data class Review(
-    val userName: String,
-    val date: String,
-    val rating: Int,
-    val text: String,
-    val itineraryTitle: String
-)

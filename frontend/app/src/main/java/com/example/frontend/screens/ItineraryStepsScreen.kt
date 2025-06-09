@@ -1,5 +1,6 @@
 package com.example.frontend.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,36 +15,70 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.frontend.components.BackButton
 import com.example.frontend.components.MapScreen
+import com.example.frontend.viewmodels.ItineraryStepViewModel
 import com.google.android.gms.maps.model.LatLng
+import java.util.UUID
+import androidx.compose.ui.Alignment
+
+
 
 @Composable
-fun ItineraryStepsScreen(navController: NavHostController) {
-    val stepLocations = listOf(
-        LatLng(48.8606, 2.3376), // Louvre Museum
-        LatLng(48.852968, 2.349902), // Notre Dame
-        LatLng(48.8584, 2.2945), // Eiffel Tower
-        LatLng(48.8738, 2.2950), // Arc de Triomphe
-        LatLng(48.8462, 2.3371) // Pantheon
-    )
+fun ItineraryStepsScreen(navController: NavHostController, itineraryIdStr: String) {
+    val viewModel: ItineraryStepViewModel = viewModel()
+    val steps by viewModel.steps.collectAsState()
+
+    val itineraryId = remember(itineraryIdStr) {
+        try {
+            UUID.fromString(itineraryIdStr).also {
+                Log.d("ItineraryStepsScreen", "Parsed UUID: $it")
+            }
+        } catch (e: IllegalArgumentException) {
+            Log.e("ItineraryStepsScreen", "Invalid UUID: $itineraryIdStr", e)
+            null
+        }
+    }
+
+
+    LaunchedEffect(itineraryId) {
+        itineraryId?.let {
+            Log.d("ItineraryStepsScreen", "Calling fetchSteps with $it")
+            viewModel.fetchSteps(it)
+        }
+    }
+
 
     var selectedStep by remember { mutableIntStateOf(0) }
+
+    val stepLocations = steps.map { LatLng(it.latitude.toDouble(), it.longitude.toDouble()) }
 
     Scaffold(
         topBar = { HomeTopBar(navController) },
         bottomBar = { BottomNavBar(navController, selectedScreen = "search") },
     ) { padding ->
+
+        val error by viewModel.error.collectAsState()
+
+        if (steps.isEmpty() && error != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No steps available for this itinerary.", color = Color.Gray)
+            }
+            return@Scaffold
+        }
+
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFF8FAFC),
-                            Color(0xFFD9EAFD)
-                        )
+                        colors = listOf(Color(0xFFF8FAFC), Color(0xFFD9EAFD))
                     )
                 )
                 .padding(padding)
@@ -64,8 +99,8 @@ fun ItineraryStepsScreen(navController: NavHostController) {
                     .weight(1f)
                     .padding(horizontal = 16.dp)
             ) {
-                itemsIndexed(stepLocations) { index, _ ->
-                    StepItem(index, selectedStep) {
+                itemsIndexed(steps) { index, step ->
+                    StepItem(index, selectedStep, step.title, step.description) {
                         selectedStep = index
                     }
                 }
@@ -75,7 +110,7 @@ fun ItineraryStepsScreen(navController: NavHostController) {
 }
 
 @Composable
-fun StepItem(index: Int, selectedStep: Int, onStepClick: () -> Unit) {
+fun StepItem(index: Int, selectedStep: Int, title: String, description: String, onStepClick: () -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -92,36 +127,16 @@ fun StepItem(index: Int, selectedStep: Int, onStepClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                text = "Step ${index + 1}",
+                text = "Step ${index + 1}: $title",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
 
-            Text(
-                text = when (index) {
-                    0 -> "Visit the Louvre Museum"
-                    1 -> "Explore Notre Dame Cathedral"
-                    2 -> "Admire the Eiffel Tower"
-                    3 -> "Walk around the Arc de Triomphe"
-                    4 -> "Discover the Pantheon"
-                    else -> "Unknown Step"
-                },
-                fontSize = 14.sp,
-                color = Color.DarkGray
-            )
-
             if (isExpanded) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = when (index) {
-                        0 -> "Wheelchair-accessible entrance via Pyramid. Elevators available. Tactile guides for visually impaired visitors. Nearest accessible metro: Palais Royal – Musée du Louvre (150m)."
-                        1 -> "Ramped access available on the south side. Interior access may be limited due to renovations. Nearest accessible metro: Saint-Michel Notre-Dame (300m)."
-                        2 -> "Elevators to upper levels are wheelchair accessible. Priority access for visitors with disabilities. Nearest accessible metro: Bir-Hakeim (250m)."
-                        3 -> "Great street-level views from Place Charles de Gaulle. No elevator access to rooftop. Nearest accessible metro: Charles de Gaulle – Étoile (200m)."
-                        4 -> "Main entrance has ramped access. Interior adapted for wheelchair users. Tactile exhibits available. Nearest accessible metro: Cardinal Lemoine (180m)."
-                        else -> "No accessibility details available."
-                    },
+                    text = description,
                     fontSize = 14.sp,
                     color = Color.Black
                 )
