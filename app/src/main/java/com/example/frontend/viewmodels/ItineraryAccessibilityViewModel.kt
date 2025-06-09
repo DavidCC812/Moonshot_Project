@@ -15,6 +15,7 @@ class ItineraryAccessibilityViewModel : ViewModel() {
         loadMockAccessibilityLinks()
     }
 
+    // Loads mock accessibility links for demonstration purposes
     private fun loadMockAccessibilityLinks() {
         val itineraryId = UUID.randomUUID()
         val wheelchairId = UUID.fromString("00000000-0000-0000-0000-000000000001")

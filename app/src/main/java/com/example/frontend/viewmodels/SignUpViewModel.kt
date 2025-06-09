@@ -14,6 +14,7 @@ import java.util.UUID
 
 class SignUpViewModel(application: Application) : AndroidViewModel(application) {
 
+    // User input state flows
     private val _fullName = MutableStateFlow("")
     val fullName: StateFlow<String> = _fullName
 
@@ -102,6 +103,7 @@ class SignUpViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    // Main signup submission: create user, auto-login, and submit related data
     fun submitSignup(countryNameToIdMap: Map<String, UUID>) {
         viewModelScope.launch {
             try {
@@ -129,6 +131,7 @@ class SignUpViewModel(application: Application) : AndroidViewModel(application) 
 
                 val userId = UUID.fromString(loginResponse.userId)
 
+                // Submit related user data
                 submitAccessibilityFeatures(userId)
                 submitUserCountryAccess(userId, countryNameToIdMap)
 

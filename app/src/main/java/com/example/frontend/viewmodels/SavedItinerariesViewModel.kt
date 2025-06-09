@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class SavedItinerariesViewModel : ViewModel() {
-
+    
+     // Demo user ID
     private val userId = UUID.fromString("00000000-0000-0000-0000-000000009999") // Demo user
 
     private val _savedItineraries = MutableStateFlow<List<SavedItinerary>>(emptyList())

@@ -73,6 +73,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Fetch user by phone with callback
     fun fetchUserByPhone(phone: String, onResult: (User?) -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -90,6 +91,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    // Login user and save JWT token
     fun login(emailOrPhone: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -123,6 +125,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Demo User
     fun loadUserFromToken() {
         viewModelScope.launch {
             try {

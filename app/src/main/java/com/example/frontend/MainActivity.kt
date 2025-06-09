@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
     fun onFacebookTokenReceived(idToken: String, onNavigateHome: () -> Unit) {
         lifecycleScope.launch {
             try {
+                // Handle Facebook login token, call backend, save JWT and navigate home
                 val response = RetrofitClient.authApi.loginWithFacebook(FirebaseSignInRequest(idToken))
                 if (response.isSuccessful) {
                     val authResponse = response.body()
@@ -87,6 +88,7 @@ class MainActivity : ComponentActivity() {
         Log.d("MainActivity", "onActivityResult called with requestCode=$requestCode")
 
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
+            // Handle Google sign-in result, call backend, save JWT and navigate home
             googleSignInManager.handleSignInResult(
                 data,
                 onSuccess = { idToken ->

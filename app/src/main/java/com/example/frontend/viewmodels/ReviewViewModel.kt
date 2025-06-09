@@ -12,9 +12,11 @@ import kotlinx.coroutines.launch
 
 class ReviewViewModel : ViewModel() {
 
+    // Holds all fetched reviews
     private val _reviews = MutableStateFlow<List<Review>>(emptyList())
     val reviews: StateFlow<List<Review>> = _reviews
 
+    // Stores error messages for UI display
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
@@ -22,6 +24,7 @@ class ReviewViewModel : ViewModel() {
         fetchAllReviews()
     }
 
+    // Fetches all reviews from the backend API
     fun fetchAllReviews() {
         viewModelScope.launch {
             try {
@@ -40,6 +43,7 @@ class ReviewViewModel : ViewModel() {
         return _reviews.value.filter { it.itineraryId.toString() == itineraryId }
     }
 
+    // Posts a new review and updates the local state
     fun postReview(
         request: ReviewRequest,
         onSuccess: () -> Unit,

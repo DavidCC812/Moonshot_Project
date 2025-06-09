@@ -39,6 +39,7 @@ fun SearchBar(
     val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxWidth()) {
+        // Search input row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,6 +77,7 @@ fun SearchBar(
 
         Spacer(modifier = Modifier.height(4.dp))
 
+         // Filter row: date, dropdown, search button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -141,6 +143,7 @@ fun SearchBar(
     }
 }
 
+// Opens a two-step date picker and formats the selected range
 fun showDatePickerDialog(context: Context, onDateChange: (String) -> Unit) {
     val calendar = Calendar.getInstance()
     val startDate = Calendar.getInstance()

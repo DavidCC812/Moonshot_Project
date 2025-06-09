@@ -18,6 +18,7 @@ class GoogleSignInManager(private val context: Context) {
     private val oneTapClient: SignInClient = Identity.getSignInClient(context)
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
+    // Build One Tap sign-in request
     private val signInRequest = BeginSignInRequest.builder()
         .setGoogleIdTokenRequestOptions(
             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
@@ -34,6 +35,7 @@ class GoogleSignInManager(private val context: Context) {
         requestCode: Int,
         onFailure: (Exception) -> Unit
     ) {
+        // Launch One Tap sign-in flow
         oneTapClient.beginSignIn(signInRequest)
             .addOnSuccessListener(activity) { result: BeginSignInResult ->
                 activity.startIntentSenderForResult(
@@ -63,6 +65,7 @@ class GoogleSignInManager(private val context: Context) {
             if (googleIdToken != null) {
                 val firebaseCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
 
+                // Sign in with Firebase using Google credential
                 firebaseAuth.signInWithCredential(firebaseCredential)
                     .addOnSuccessListener { authResult ->
                         firebaseAuth.currentUser?.getIdToken(true)

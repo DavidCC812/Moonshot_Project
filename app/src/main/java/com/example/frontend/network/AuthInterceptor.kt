@@ -7,6 +7,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import kotlinx.coroutines.flow.firstOrNull
 
+// Adds Authorization header with bearer token if available
 class AuthInterceptor(private val context: Context) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()

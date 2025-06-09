@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(private val userId: String) : ViewModel() {
 
+    // UI representation of user settings
     private val _settings = MutableStateFlow<List<UserSettingUi>>(emptyList())
     val settings: StateFlow<List<UserSettingUi>> = _settings
 
@@ -25,6 +26,7 @@ class SettingsViewModel(private val userId: String) : ViewModel() {
         loadSettings()
     }
 
+    // Load all settings and user's current preferences, combine for UI
     private fun loadSettings() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -55,6 +57,7 @@ class SettingsViewModel(private val userId: String) : ViewModel() {
         }
     }
 
+    // Create or update user setting based on existence
     fun postUserSetting(settingId: String, value: Boolean) {
         viewModelScope.launch {
             try {
@@ -74,7 +77,7 @@ class SettingsViewModel(private val userId: String) : ViewModel() {
                     Log.d("SettingsViewModel", "Created setting via POST: $settingId = $value")
                 }
 
-                // Update local UI
+                // Update local UI state
                 val updatedList = _settings.value.map {
                     if (it.settingId == settingId) it.copy(value = value) else it
                 }
@@ -85,5 +88,4 @@ class SettingsViewModel(private val userId: String) : ViewModel() {
             }
         }
     }
-
 }

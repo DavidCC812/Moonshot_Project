@@ -9,6 +9,7 @@ class MyReviewsViewModel : ViewModel() {
     val myReviews = mutableStateListOf<Review>()
 
     init {
+         // Mock data for demonstration purposes
         val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
             .format(java.util.Date())
         val userId = UUID.fromString("00000000-0000-0000-0000-000000000000")
@@ -17,7 +18,7 @@ class MyReviewsViewModel : ViewModel() {
             UUID.fromString("55555555-5555-5555-5555-555555555555"),
             UUID.fromString("33333333-3333-3333-3333-333333333333")
         )
-
+        // Preloaded sample reviews
         myReviews.addAll(
             listOf(
                 Review(
@@ -50,7 +51,7 @@ class MyReviewsViewModel : ViewModel() {
             )
         )
     }
-
+        // Adds a new review to the top of the list
         fun addReview(review: Review) {
         myReviews.add(0, review)
     }

@@ -65,6 +65,7 @@ fun RecommendedDestinationCard(
         ) {
             val painter = rememberAsyncImagePainter(imageUrl ?: "")
 
+            // Image container
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,6 +83,7 @@ fun RecommendedDestinationCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Title + location + rating row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -117,6 +119,7 @@ fun RecommendedDestinationCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Duration + people row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -142,6 +145,7 @@ fun RecommendedDestinationCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Toggleable accessibility features section
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

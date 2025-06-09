@@ -21,6 +21,7 @@ object FacebookSignInManager {
     private var onSuccess: ((String) -> Unit)? = null
     private var onFailure: ((Exception) -> Unit)? = null
 
+    // Set up Facebook login callback
     init {
         LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
             override fun onSuccess(result: LoginResult) {
@@ -44,10 +45,12 @@ object FacebookSignInManager {
         onFailure: (Exception) -> Unit
     ) {
         this.onSuccess = onSuccess
-        this.onFailure = onFailure
-
+        this.onFailure = onFailure 
+        
+        // Ensure clean session before login
         LoginManager.getInstance().logOut()
 
+        // Use dialog UI and request profile/email permissions
         LoginManager.getInstance().setLoginBehavior(LoginBehavior.DIALOG_ONLY)
         LoginManager.getInstance().logInWithReadPermissions(activity, listOf("email", "public_profile"))
     }

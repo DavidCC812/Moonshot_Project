@@ -19,7 +19,7 @@ class ItineraryViewModel : ViewModel() {
     init {
         fetchItineraries()
     }
-
+    // Returns a Flow that emits the itinerary matching the given ID
     fun getItineraryById(itineraryId: String): Flow<Itinerary?> {
         return itineraries.map { list ->
             list.find { it.id.toString() == itineraryId }

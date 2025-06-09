@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import android.content.Context
 import okhttp3.OkHttpClient
 
-
+// Central Retrofit client with configured APIs and auth interceptor
 object RetrofitClient {
 
     private const val BASE_URL = "http://10.0.2.2:8080"
