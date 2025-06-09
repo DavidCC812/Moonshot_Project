@@ -34,7 +34,7 @@ class UserServiceTest {
     void cleanUp() throws Exception {
         userRepository.deleteAll();
 
-        // Create a base user and log in
+       // Set up an authenticated user and retrieve a valid token
         userRepository.save(User.builder()
                 .email("user@example.com")
                 .passwordHash(passwordEncoder.encode("secret"))
@@ -57,6 +57,7 @@ class UserServiceTest {
 
     @Test
     void shouldCreateUserAndFetchItById() throws Exception {
+        // Create a new user
         UserRequest request = UserRequest.builder()
                 .name("Alice")
                 .email("alice@example.com")
@@ -75,6 +76,7 @@ class UserServiceTest {
 
         UserResponse created = objectMapper.readValue(result.getResponse().getContentAsString(), UserResponse.class);
 
+        // Fetch user by ID and verify data
         mockMvc.perform(get("/api/users/" + created.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -86,6 +88,7 @@ class UserServiceTest {
 
     @Test
     void shouldReturnAllUsers() throws Exception {
+        // Add an additional user
         UserRequest request = UserRequest.builder()
                 .name("Bob")
                 .email("bob@example.com")
@@ -99,6 +102,7 @@ class UserServiceTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
+        // Should return both the authenticated user and Bob
         mockMvc.perform(get("/api/users")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -107,6 +111,7 @@ class UserServiceTest {
 
     @Test
     void shouldDeleteUser() throws Exception {
+        // Create a user to be deleted
         User user = userRepository.save(User.builder()
                 .name("Charlie")
                 .email("charlie@example.com")
@@ -117,10 +122,11 @@ class UserServiceTest {
                 .updatedAt(java.time.LocalDateTime.now())
                 .build());
 
+        // Delete the user
         mockMvc.perform(delete("/api/users/" + user.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
-
+        // Verify user is no longer retrievable
         mockMvc.perform(get("/api/users/" + user.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());

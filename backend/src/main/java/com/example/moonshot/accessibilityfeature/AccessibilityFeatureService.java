@@ -27,12 +27,13 @@ public class AccessibilityFeatureService {
                 .collect(Collectors.toList());
     }
 
-
+    // Fetch a feature or throw if not found
     public AccessibilityFeature getFeatureById(UUID id) {
         return featureRepository.findById(id)
                 .orElseThrow(() -> new MoonshotException("Accessibility feature not found"));
     }
 
+    // Build and persist a new feature with current timestamps
     @Transactional
     public AccessibilityFeature createFeature(AccessibilityFeatureRequest dto) {
         AccessibilityFeature feature = AccessibilityFeature.builder()

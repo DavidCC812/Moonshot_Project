@@ -32,7 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-
+        
+        // Skip if no Bearer token
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -44,8 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             userEmail = jwtService.extractEmail(token);
         } catch (Exception e) {
-            // Catch any JWT parsing exception (invalid signature, expired, etc.)
-            // Do not set authentication → proceed without setting SecurityContext
+            // Invalid token
             filterChain.doFilter(request, response);
             return;
         }

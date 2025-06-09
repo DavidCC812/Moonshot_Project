@@ -33,6 +33,7 @@ public class FirebaseTokenVerifier {
     private static final Logger log = LoggerFactory.getLogger(FirebaseTokenVerifier.class);
     private ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
 
+    // Initialize JWT processor with Firebase's public keys (JWK) for verifying ID tokens
     @PostConstruct
     private void init() {
         try {
@@ -50,6 +51,7 @@ public class FirebaseTokenVerifier {
         }
     }
 
+    // Verifies the token and checks Firebase issuer/audience
     public Map<String, Object> verify(String idToken) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(idToken);

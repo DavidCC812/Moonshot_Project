@@ -29,6 +29,7 @@ public class AccessibilityFeatureController {
         return AccessibilityFeatureResponse.from(feature);
     }
 
+    // Create and persist a new feature based on the request
     @PostMapping
     public AccessibilityFeatureResponse createFeature(@RequestBody AccessibilityFeatureRequest request) {
         AccessibilityFeature created = featureService.createFeature(request);

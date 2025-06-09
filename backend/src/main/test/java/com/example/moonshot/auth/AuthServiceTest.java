@@ -41,6 +41,7 @@ class AuthServiceTest {
     void setUp() {
         userRepository.deleteAll();
 
+        // Save one valid user to test login via email and phone
         userRepository.save(User.builder()
                 .email("valid@example.com")
                 .phone("1234567890")
@@ -52,6 +53,7 @@ class AuthServiceTest {
 
     @Test
     void shouldLoginSuccessfullyWithEmail() throws Exception {
+        // Email-based login should succeed and return token + user info
         LoginRequest request = new LoginRequest();
         request.setIdentifier("valid@example.com");
         request.setPassword("correctpassword");
@@ -67,6 +69,7 @@ class AuthServiceTest {
 
     @Test
     void shouldLoginSuccessfullyWithPhone() throws Exception {
+         // Phone-based login using same user should also work
         LoginRequest request = new LoginRequest();
         request.setIdentifier("1234567890");
         request.setPassword("correctpassword");
@@ -81,6 +84,7 @@ class AuthServiceTest {
 
     @Test
     void shouldFailWithWrongPassword() throws Exception {
+        // Login should fail with incorrect password
         LoginRequest request = new LoginRequest();
         request.setIdentifier("valid@example.com");
         request.setPassword("wrongpassword");
@@ -93,6 +97,7 @@ class AuthServiceTest {
 
     @Test
     void shouldFailWithUnknownEmail() throws Exception {
+         // Login should fail if user does not exist
         LoginRequest request = new LoginRequest();
         request.setIdentifier("unknown@example.com");
         request.setPassword("any");
@@ -105,6 +110,7 @@ class AuthServiceTest {
 
     @Test
     void shouldCreateUserViaGoogleSignIn() throws Exception {
+         // Simulate Google sign-in with mocked token verification
         String idToken = "fake-google-token";
 
         when(firebaseTokenVerifier.verify(idToken)).thenReturn(Map.of(
@@ -123,6 +129,7 @@ class AuthServiceTest {
                 .andExpect(jsonPath("$.email").value("google@example.com"))
                 .andExpect(jsonPath("$.token").exists());
 
+        // Verify user was saved with correct provider info
         User savedUser = userRepository.findByEmail("google@example.com").orElseThrow();
         assertEquals("GOOGLE", savedUser.getPlatform());
         assertEquals("fake-google-token", savedUser.getOauthToken());
@@ -130,6 +137,7 @@ class AuthServiceTest {
 
     @Test
     void shouldCreateUserViaFacebookSignIn() throws Exception {
+        // Simulate Facebook sign-in with mocked token verification
         String idToken = "fake-fb-token";
 
         when(firebaseTokenVerifier.verify(idToken)).thenReturn(Map.of(
@@ -148,6 +156,7 @@ class AuthServiceTest {
                 .andExpect(jsonPath("$.email").value("facebook@example.com"))
                 .andExpect(jsonPath("$.token").exists());
 
+        // Verify user was saved with correct provider info
         User savedUser = userRepository.findByEmail("facebook@example.com").orElseThrow();
         assertEquals("FACEBOOK", savedUser.getPlatform());
         assertEquals("fake-fb-token", savedUser.getOauthToken());

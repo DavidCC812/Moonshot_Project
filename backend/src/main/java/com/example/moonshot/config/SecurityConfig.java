@@ -42,12 +42,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // Sends 401 Unauthorized for unauthenticated access
     @Bean
     public AuthenticationEntryPoint unauthorizedEntryPoint() {
         return (request, response, authException) ->
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
-
+    
+    // Password encoder for hashing user passwords
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

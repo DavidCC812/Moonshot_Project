@@ -28,12 +28,14 @@ public class AccessibilityFeature {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Set timestamps before saving to DB
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
+    // Update timestamp on each modification
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();

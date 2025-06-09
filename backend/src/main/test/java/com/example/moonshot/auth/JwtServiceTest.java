@@ -20,6 +20,7 @@ class JwtServiceTest {
 
         String token = jwtService.generateToken(java.util.UUID.randomUUID(), userDetails.getUsername());
 
+        // Token should be valid and contain the correct email
         assertThat(jwtService.isTokenValid(token, userDetails)).isTrue();
         assertThat(jwtService.extractEmail(token)).isEqualTo("user@example.com");
     }
@@ -31,13 +32,13 @@ class JwtServiceTest {
                 .roles("USER")
                 .build();
 
-        // Token that expires in 10 ms
+        // Generate a token that expires in 10 milliseconds
         String token = jwtService.generateTokenWithExpiration(java.util.UUID.randomUUID(), userDetails.getUsername(), 10);
 
-        // Wait until the token definitely expires
+        // Wait for token to expire
         Thread.sleep(50);
 
-        // Assert that extracting claims from the expired token throws
+        // Extracting email from expired token should throw
         assertThatThrownBy(() -> jwtService.extractEmail(token))
                 .isInstanceOf(ExpiredJwtException.class);
     }

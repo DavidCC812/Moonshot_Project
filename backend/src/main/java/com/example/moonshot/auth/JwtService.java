@@ -23,7 +23,7 @@ public class JwtService {
         return buildToken(userId, email, DEFAULT_EXPIRATION_TIME);
     }
 
-    //Testing purposes
+    // For test cases: generate token with custom expiration
     public String generateTokenWithExpiration(UUID userId, String email, long expirationMillisFromNow) {
         return buildToken(userId, email, expirationMillisFromNow);
     }
@@ -56,6 +56,7 @@ public class JwtService {
         return expiration.before(new Date());
     }
 
+    // Parses and returns all claims from the token
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)

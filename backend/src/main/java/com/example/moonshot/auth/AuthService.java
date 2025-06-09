@@ -61,6 +61,7 @@ public class AuthService {
                 .build();
     }
 
+    // Reuse existing user or create a new one based on Firebase payload
     private LoginResponse loginOrRegisterWithFirebasePayload(Map<String, Object> payload, String idToken, String platform) {
         String email = (String) payload.get("email");
         String name = (String) payload.get("name");
@@ -98,6 +99,7 @@ public class AuthService {
         return loginOrRegisterWithFirebasePayload(payload, request.getIdToken(), "GOOGLE");
     }
 
+    // Handle Facebook login, including token verification and logging
     public LoginResponse loginOrRegisterWithFacebook(FacebookSignInRequest request) {
         log.info("Received Facebook token: {}", request.getIdToken());
         try {
