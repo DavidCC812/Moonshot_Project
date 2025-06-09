@@ -4,16 +4,13 @@
 **Author**: David Cuahonte Cuevas 
 **Submission Date**: June 10, 2025
 
-
-
 # Summary
 
 This thesis presents the development of **Inclusive Trip Planner**, a mobile application designed to assist individuals with disabilities in planning accessible trips. The app enables users to create profiles, indicate their accessibility needs, browse and save inclusive itineraries, and review destinations based on criteria such as wheelchair access or visual signage.
 
 The system was developed as a native Android application using **Jetpack Compose** [1](#1-jetpack-compose) and **Kotlin**. It is supported by a backend built with **Spring Boot** [2](#2-spring-boot) and **PostgreSQL** [3](#3-postgresql), structured following a multi-layered architecture that separates controllers, services, repositories, and **DTOs** [4](#4-dto-data-transfer-object).
 
-
-A waterfall-inspired methodology guided the project, with phases dedicated to specifications, interface prototyping, backend implementation, and integration. Testing was conducted at multiple levels, including REST API validation and feature-specific integration tests on the frontend. The resulting prototype demonstrates the feasibility of inclusive itinerary recommendations, reinforcing the importance of **accessibility** [5] in digital travel platforms.
+A waterfall-inspired methodology guided the project, with phases dedicated to specifications, interface prototyping, backend implementation, and integration. Testing was conducted at multiple levels, including REST API validation and feature-specific integration tests on the frontend. The resulting prototype is a demonstration of the feasibility to have itineraries with inclusive recommendations, which reinforces the importance of **accessibility** [5](#5-accessibility). in digital travel platforms.
 
 **Keywords:** Accessibility, Inclusive Travel, Trip Planning, User Experience, Mobility, Digital Inclusion.
 
@@ -27,9 +24,9 @@ A waterfall-inspired methodology guided the project, with phases dedicated to sp
 - [Table of Contents](#table-of-contents)
 - [1. Introduction](#1-introduction)
   - [2. Motivation](#2-motivation)
-    - [2.1. Relevance of Mobile Travel Apps for Accessibility](#21-relevance-of-mobile-travel-apps-for-accessibility)
-    - [2.2. Gaps in Accessibility-Aware Travel Planning](#22-gaps-in-accessibility-aware-travel-planning)
-    - [2.3. Project Impact and Contribution](#23-project-impact-and-contribution)
+    - [2.1 Relevance of Mobile Travel Apps for Accessibility](#21-relevance-of-mobile-travel-apps-for-accessibility)
+    - [2.2 Gaps in Accessibility-Aware Travel Planning](#22-gaps-in-accessibility-aware-travel-planning)
+    - [2.3 Project Impact and Contribution](#23-project-impact-and-contribution)
 - [3. Objectives](#3-objectives)
   - [3.1 General Objective](#31-general-objective)
   - [3.2 Specific Objectives](#32-specific-objectives)
@@ -114,82 +111,85 @@ A waterfall-inspired methodology guided the project, with phases dedicated to sp
       - [Post-Login Routing and Manual Control](#post-login-routing-and-manual-control)
       - [Future Considerations](#future-considerations-1)
 - [10 Demonstration of the project](#10-demonstration-of-the-project)
-    - [10.1 Setup and Execution Environment](#101-setup-and-execution-environment)
-      - [Frontend Environment](#frontend-environment)
-      - [Backend Environment](#backend-environment)
-    - [10.2 Demonstration Objectives](#102-demonstration-objectives)
-    - [10.3 Execution Flow and Screens](#103-execution-flow-and-screens)
-      - [App Launch and Authentication](#app-launch-and-authentication)
-        - [Login via Email or Phone](#login-via-email-or-phone)
-    - [10.3.2 Signup Flow](#1032-signup-flow)
-      - [SignUpNameScreen](#signupnamescreen)
-      - [SignUpEmailScreen / SignUpPhoneScreen](#signupemailscreen--signupphonescreen)
-      - [SignUpPasswordScreen](#signuppasswordscreen)
-      - [SignUpAccessibilityScreen](#signupaccessibilityscreen)
-      - [SignUpCountriesScreen](#signupcountriesscreen)
-      - [Backend Integration](#backend-integration)
-    - [10.3.3 Home Screen and Itinerary Access](#1033-home-screen-and-itinerary-access)
-      - [Next Plan Section](#next-plan-section)
+  - [10.1 Setup and Execution Environment](#101-setup-and-execution-environment)
+    - [Frontend Environment](#frontend-environment)
+    - [Backend Environment](#backend-environment)
+  - [10.2 Demonstration Objectives](#102-demonstration-objectives)
+  - [10.3 Execution Flow and Screens](#103-execution-flow-and-screens)
+    - [App Launch and Authentication](#app-launch-and-authentication)
+      - [Login via Email or Phone](#login-via-email-or-phone)
+    - [Signup Flow](#signup-flow)
+    - [SignUpNameScreen](#signupnamescreen)
+    - [SignUpEmailScreen / SignUpPhoneScreen](#signupemailscreen--signupphonescreen)
+    - [SignUpPasswordScreen](#signuppasswordscreen)
+    - [SignUpAccessibilityScreen](#signupaccessibilityscreen)
+    - [SignUpCountriesScreen](#signupcountriesscreen)
+    - [Backend Integration](#backend-integration)
+    - [Home Screen and Itinerary Access](#home-screen-and-itinerary-access)
+    - [Next Plan Section](#next-plan-section)
       - [Available Itineraries List](#available-itineraries-list)
       - [Technical Notes](#technical-notes)
       - [Optional States and Fallbacks](#optional-states-and-fallbacks)
-    - [10.3.4 Itinerary Details](#1034-itinerary-details)
-    - [10.3.5 Itinerary Steps](#1035-itinerary-steps)
+    - [Itinerary Details](#itinerary-details)
+    - [Itinerary Steps](#itinerary-steps)
       - [Structure and Navigation](#structure-and-navigation)
       - [Data Handling and Integration](#data-handling-and-integration)
       - [Implementation Notes](#implementation-notes)
-    - [10.3.6 Review Submission](#1036-review-submission)
+    - [Review Submission](#review-submission)
       - [Access Points](#access-points)
       - [WriteAReviewScreen](#writeareviewscreen)
       - [Backend Integration](#backend-integration-1)
       - [Review Display](#review-display)
       - [Technical Notes](#technical-notes-1)
-    - [10.3.7 Saved Itineraries](#1037-saved-itineraries)
-      - [Saving and Removing Itineraries](#saving-and-removing-itineraries)
-      - [SavedItinerariesScreen](#saveditinerariesscreen)
+    - [Search Screen](#search-screen)
+      - [Itinerary Display](#itinerary-display)
       - [Backend Integration](#backend-integration-2)
-      - [Fallback and Error Handling](#fallback-and-error-handling)
-    - [10.3.9 Profile Screen](#1039-profile-screen)
-      - [Layout and Structure](#layout-and-structure)
+    - [Saved Itineraries](#saved-itineraries)
+      - [Saving and Removing Itineraries](#saving-and-removing-itineraries)
+    - [SavedItinerariesScreen](#saveditinerariesscreen)
       - [Backend Integration](#backend-integration-3)
-    - [10.4 Visual Feedback and Responsiveness](#104-visual-feedback-and-responsiveness)
+      - [Fallback and Error Handling](#fallback-and-error-handling)
+    - [Profile Screen](#profile-screen)
+      - [Layout and Structure](#layout-and-structure)
+      - [Backend Integration](#backend-integration-4)
+  - [10.4 Visual Feedback and Responsiveness](#104-visual-feedback-and-responsiveness)
       - [Loading Indicators and Progress Feedback](#loading-indicators-and-progress-feedback)
       - [Error Messaging and Fallback States](#error-messaging-and-fallback-states)
       - [Dynamic UI Behavior](#dynamic-ui-behavior)
       - [UI Layout and Spacing Improvements](#ui-layout-and-spacing-improvements)
       - [Accessibility Considerations](#accessibility-considerations)
       - [Conclusion](#conclusion)
-    - [10.5.1 Database State Verification](#1051-database-state-verification)
+  - [10.5 Database State Verification](#105-database-state-verification)
       - [Saved Itinerary Entry](#saved-itinerary-entry)
       - [Submitted Review Entry](#submitted-review-entry)
-    - [10.5.2 API Activity and Logging](#1052-api-activity-and-logging)
+    - [API Activity and Logging](#api-activity-and-logging)
       - [Android Logcat Monitoring](#android-logcat-monitoring)
       - [Spring Boot Console Output](#spring-boot-console-output)
       - [JWT Validation and Error Feedback](#jwt-validation-and-error-feedback)
-    - [10.5.3 Error Feedback Confirmation](#1053-error-feedback-confirmation)
+    - [Error Feedback Confirmation](#error-feedback-confirmation)
       - [Invalid Token Handling](#invalid-token-handling)
       - [Duplicate Save Request](#duplicate-save-request)
       - [Missing Fields in Review Submission](#missing-fields-in-review-submission)
-    - [10.5.4 Summary of API Observability](#1054-summary-of-api-observability)
+    - [Summary of API Observability](#summary-of-api-observability)
       - [Observable Layers](#observable-layers)
-    - [10.6 Summary and Next Steps](#106-summary-and-next-steps)
+  - [10.6 Summary and Next Steps](#106-summary-and-next-steps)
 - [Conclusions](#conclusions)
   - [11.1 Summary of Results](#111-summary-of-results)
-    - [11.2 Implications of the Results](#112-implications-of-the-results)
-    - [11.3 Limitations](#113-limitations)
-      - [Static Itinerary Content](#static-itinerary-content)
-      - [Limited Accessibility Logic](#limited-accessibility-logic)
-      - [Authentication Flow Gaps](#authentication-flow-gaps)
-      - [No Offline or Cache Mode](#no-offline-or-cache-mode)
-      - [MVP Constraints](#mvp-constraints)
-    - [11.4 Future Work](#114-future-work)
-      - [1. Personalized Itinerary Recommendations](#1-personalized-itinerary-recommendations)
-      - [2. OTP Verification and Full Phone Signup Support](#2-otp-verification-and-full-phone-signup-support)
-      - [3. Offline Access and Smart Caching](#3-offline-access-and-smart-caching)
-      - [4. Accessibility-Specific Enhancements](#4-accessibility-specific-enhancements)
-      - [5. Admin Interface and Content Expansion](#5-admin-interface-and-content-expansion)
-      - [6. Deployment and User Testing](#6-deployment-and-user-testing)
-    - [11.5 Final Words](#115-final-words)
+  - [11.2 Implications of the Results](#112-implications-of-the-results)
+  - [11.3 Limitations](#113-limitations)
+    - [Static Itinerary Content](#static-itinerary-content)
+    - [Limited Accessibility Logic](#limited-accessibility-logic)
+    - [Authentication Flow Gaps](#authentication-flow-gaps)
+    - [No Offline or Cache Mode](#no-offline-or-cache-mode)
+    - [MVP Constraints](#mvp-constraints)
+  - [11.4 Future Work](#114-future-work)
+    - [1. Personalized Itinerary Recommendations](#1-personalized-itinerary-recommendations)
+    - [2. OTP Verification and Full Phone Signup Support](#2-otp-verification-and-full-phone-signup-support)
+    - [3. Offline Access and Smart Caching](#3-offline-access-and-smart-caching)
+    - [4. Accessibility-Specific Enhancements](#4-accessibility-specific-enhancements)
+    - [5. Admin Interface and Content Expansion](#5-admin-interface-and-content-expansion)
+    - [6. Deployment and User Testing](#6-deployment-and-user-testing)
+  - [11.5 Final Words](#115-final-words)
   - [Appendix](#appendix)
     - [\[1\] Jetpack Compose](#1-jetpack-compose)
     - [\[2\] Spring Boot](#2-spring-boot)
@@ -228,7 +228,7 @@ This gap affects a wide range of users who face barriers when organizing trips, 
 
 This project was motivated by the need to address that gap through a solution designed specifically for inclusive trip planning. The idea emerged from a personal experience during a trip in my home country, where organizing visits with elderly relatives proved difficult due to the lack of reliable information about accessibility in many public and cultural spaces. This showcased how existing tools often fall short for users with mobility challenges, reinforcing the need for a platform where accessibility is not an afterthought, but a central design principle in the travel planning experience.
 
-### 2.1. Relevance of Mobile Travel Apps for Accessibility
+### 2.1 Relevance of Mobile Travel Apps for Accessibility
 
 Mobile travel applications have become essential tools for organizing trips, discovering destinations, and navigating transportation. Their popularity has grown steadily, especially among users who rely on smartphones for daily planning and real-time guidance during their travels.
 
@@ -236,7 +236,7 @@ Despite this, most mainstream travel apps focus on general convenience rather th
 
 The decision to focus on mobile trip planning in this thesis is based on both the **high adoption** of travel apps and the **lack of inclusive features** within them.
 
-### 2.2. Gaps in Accessibility-Aware Travel Planning
+### 2.2 Gaps in Accessibility-Aware Travel Planning
 
 While some platforms have started to include minimal accessibility labels, they often present generic or incomplete information. Users with specific mobility or sensory needs are left without clear indicators of whether a destination or route is suitable for them.
 
@@ -244,7 +244,7 @@ This lack of detail leads to uncertainty and discourages independent travel plan
 
 The Inclusive Trip Planner aims to solve this issue by combining accessibility data, user reviews, and itinerary customization into a single mobile platform. This allows users to plan trips with greater confidence and clarity, ensuring that travel decisions are made based on actual access needs.
 
-### 2.3. Project Impact and Contribution
+### 2.3 Project Impact and Contribution
 
 This project explores the development of a mobile travel planning application that integrates accessibility into its core structure. By allowing users to browse and save inclusive itineraries based on specific needs, it addresses a common limitation found in many existing travel platforms: the absence of actionable accessibility information.
 
@@ -374,7 +374,7 @@ These hypotheses form the basis for the implementation strategy and define the s
 
 This thesis demonstrates that even a limited implementation of accessibility filtering and itinerary generation can support inclusive trip planning, using current mobile technologies. The project proposes the development and evaluation of a mobile application focused on enabling users with mobility or sensory impairments to make informed travel decisions by combining real accessibility data, user preferences, and community-generated reviews.
 
-The proposed system is composed of two primary components: a native Android application and a backend API. The mobile frontend allows users to select destinations, apply accessibility-related filters (such as ramps, elevators, or braille signage), and save personalized itineraries. The backend, implemented in Spring Boot with a PostgreSQL database, manages user preferences, itineraries, and accessibility data. Communication between both components is handled via RESTful endpoints.
+The proposed system is composed of two primary components: a native Android application and a backend API. The mobile frontend allows users to select destinations, apply accessibility-related filters, and save personalized itineraries. The backend, implemented in Spring Boot with a PostgreSQL database, manages user preferences, itineraries, and accessibility data. Communication between both components is handled via RESTful endpoints.
 
 Unlike traditional trip planning tools, this system integrates accessibility filtering directly into itinerary construction. Users are guided through a structured onboarding process where they define their accessibility needs, which then inform the logic behind destination filtering and itinerary suggestions. The user interacts with the system by selecting their preferences, exploring filtered destinations, and saving complete travel plans based on those criteria. The itinerary steps are curated and stored in the backend, allowing for reusable trip structures adapted to each user.
 
@@ -614,8 +614,7 @@ The filtering feature, when implemented, will use the accessibility preferences 
 **Application structure**  
 The system is divided into two principal components:
 
-- **Frontend**: A native Android application built with Kotlin and Jetpack Compose. It provides the user interface for browsing itineraries, selecting accessibility preferences, saving trips, and submitting reviews. All HTTP requests are made using Retrofit, and the state is managed via ViewModels  and **StateFlow** [11](#11-stateflow).
-
+- **Frontend**: A native Android application built with Kotlin and Jetpack Compose. It provides the user interface for browsing itineraries, selecting accessibility preferences, saving trips, and submitting reviews. All HTTP requests are made using Retrofit, and the state is managed via ViewModels and **StateFlow** [11](#11-stateflow).
 
 - **Backend**: A Spring Boot API that manages core logic and data persistence. It exposes REST endpoints for all major operations and communicates with a PostgreSQL database. The backend includes full CRUD operations for itineraries, destinations, and accessibility features.
 
@@ -873,7 +872,7 @@ This feature is split across three key screens:
 
 - **Itinerary Details Screen**: Users can browse all reviews associated with the current itinerary and submit a new review via a dedicated button.
 - **Write a Review Screen**: Provides a form to input rating, comment, name (optional), and anonymity flag.
-- **Profile Screen**: Users can view their own past activity, including submitted reviews, accessible from the “My Activity” section.
+- **Profile Screen**: Users can view their own past activity, including submitted reviews.
 
 **Kotlin** – `ReviewCard()` Composable (renders a review)
 
@@ -1011,13 +1010,12 @@ The backend of the Inclusive Trip Planner is implemented using Spring Boot and f
 
 The architecture encourages separation of concerns and makes each module easier to test, extend, and debug. Below, we present a simplified overview of two representative entities: **User** and **Setting**.
 
----
 
 #### User Entity
 
 The User entity models a registered person in the system and includes fields for platform-based authentication and contact data. The entity uses lifecycle annotations to populate timestamps automatically.
 
-– Example excerpt from the User model:
+**Java** – `UserModel` (Spring Boot backend model)
 ```java
 @Entity
 @Table(name = "users")
@@ -1038,7 +1036,7 @@ public class User {
 
 Data Transfer Objects (DTOs) are used to accept input from the frontend and return sanitized responses. Mapping is done manually for clarity.
 
-– Request DTO for creating a user:
+**Java** – `UserRequest` (Spring Boot backend DTO)
 ```java
 @Data
 @Builder
@@ -1052,7 +1050,7 @@ public class UserRequest {
 
 Custom repository methods allow queries by fields like email or phone:
 
-– User repository with a custom lookup:
+**Java** – `UserRepository` (Spring Boot backend repository)
 ```java
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
@@ -1061,7 +1059,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
 The service layer handles business logic, including validation and password encoding. The example below enforces different rules depending on the platform type:
 
-– Excerpt from UserService:
+**Java** – `UserRepository` (Spring Boot backend service)
 ```java
 @Transactional
 public User createUser(UserRequest dto) {
@@ -1078,13 +1076,11 @@ public User createUser(UserRequest dto) {
 }
 ```
 
----
-
 #### Setting Entity
 
 The Setting entity stores configurable app preferences, such as notification toggles or labels. It uses a unique key to distinguish settings.
 
-– Excerpt from the Setting model:
+**Java** – `SettingModel` (Spring Boot backend model)
 ```java
 @Entity
 @Table(name = "settings")
@@ -1101,7 +1097,8 @@ public class Setting {
 
 As with other entities, the service creates and validates the setting, mapping values from a DTO:
 
-– Excerpt from SettingService:
+**Java** – `SettingService` (Spring Boot backend service)
+
 ```java
 @Transactional
 public Setting createSetting(SettingRequest dto) {
@@ -1154,6 +1151,8 @@ logging:
 
 Each test class is annotated with:
 
+**Java** – `IntegrationTest` (Spring Boot backend integration test)
+
 ```java
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -1162,13 +1161,14 @@ Each test class is annotated with:
 
 This setup ensures each test suite uses the test profile and communicates via real HTTP using `MockMvc`.
 
----
 
 #### Example: `UserServiceTest`
 
 This test verifies basic operations for the User entity. It includes a setup step to register and log in a test user for authenticated calls.
 
 **Creating and Fetching a User**
+
+**Java** – `UserServiceTest` (Spring Boot backend integration test)
 
 ```java
 @Test
@@ -1204,6 +1204,8 @@ void shouldCreateUserAndFetchItById() throws Exception {
 The `SettingServiceTest` validates system preferences through CRUD operations.
 
 **Creating and Validating a Setting**
+
+**Java** – `SettingServiceTest` (Spring Boot backend integration test)
 
 ```java
 @Test
@@ -1245,7 +1247,7 @@ JWT tokens are generated during login and include the user’s ID and email as e
 
 The `JwtService` class is responsible for creating and validating tokens. Tokens are signed with an HMAC SHA-256 secret key and are set to expire after 24 hours.
 
-– Excerpt of token creation:
+**Java** – `JWTService` (Spring Boot backend token generation)
 
 ```java
 public String generateToken(UUID userId, String email) {
@@ -1266,7 +1268,7 @@ The token includes both subject (email) and custom claims (user ID). It is signe
 
 To process incoming requests, the `JwtAuthenticationFilter` checks for a `Bearer` token in the `Authorization` header. If valid, it extracts the user’s email, loads the corresponding `UserDetails`, and populates the Spring Security context.
 
-– Excerpt of authentication logic:
+**Java** – `JwtAuthenticationFilter` (Spring Boot backend authentication)
 
 ```java
 @Override
@@ -1298,7 +1300,6 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
 
 This filter ensures that only valid tokens can access protected endpoints and that authentication information is injected into the request lifecycle.
 
-
 #### Password Logic and Platform Rules
 
 When creating users, the backend enforces rules based on the authentication platform:
@@ -1307,6 +1308,8 @@ When creating users, the backend enforces rules based on the authentication plat
 - If the user uses OAuth (e.g. Google or Facebook), passwords are not accepted.
 
 These rules are enforced in the `UserService`:
+
+**Java** – `UserService` (Spring Boot backend platform rules)
 
 ```java
 if (platform.equals("EMAIL")) {
@@ -1332,6 +1335,8 @@ This ensures secure credential handling and clean separation between login strat
 Access control for the Inclusive Trip Planner is configured through a `SecurityConfig` class. The application enforces **stateless JWT-based authentication**, meaning no sessions or cookies are used. Only explicitly defined endpoints are publicly accessible.
 
 A custom filter is injected into the Spring Security filter chain to validate tokens before requests reach secured controllers. Additionally, unauthorized requests return a standardized 401 response.
+
+**Java** – `Security config` (Spring Boot backend integration test)
 
 – **Route Protection and Stateless Session Policy**:
 ```java
@@ -1379,7 +1384,7 @@ Upon receiving the credentials, the system:
 
 If the credentials are invalid, the service throws an appropriate exception, and the controller returns a `400 Bad Request`.
 
-– Core logic of `AuthService.login()`:
+**Java** – `AuthService.login()` (Spring Boot backend core logic of authentication)
 ~~~java
 public LoginResponse login(LoginRequest request) {
     User user = userRepository.findByEmail(request.getIdentifier())
@@ -1402,7 +1407,6 @@ public LoginResponse login(LoginRequest request) {
 }
 ~~~
 
----
 
 ### Firebase-Based Social Login Flow (Google & Facebook)
 
@@ -1412,50 +1416,134 @@ This process ensures stateless, secure login without relying on traditional pass
 
 #### Login Flow Overview
 
-1. The frontend initiates authentication using the Firebase SDK.
-2. A Firebase ID token is returned after successful login.
+1. The frontend initiates the login process via the Firebase SDK (Google One Tap or Facebook Login).
+2. Upon successful authentication, Firebase returns an ID token.
 3. The token is sent to the backend endpoint:
    - `/api/auth/google` or `/api/auth/facebook`
-4. The backend verifies the token using Firebase’s public keys.
-5. The backend either logs in the existing user or registers a new one.
-6. A backend-generated JWT is returned for sessionless authorization.
+4. The backend verifies the token using Firebase’s public keys via the Nimbus JOSE JWT library.
+5. Based on the token payload:
+    - If the user exists → update OAuth fields and re-login.
+    - If the user does not exist → create a new account.
+6. The backend issues its own JWT for subsequent requests, returning it in the LoginResponse.
 
-– Example backend endpoints:
+**Java** – `AuthController` (Spring Boot backend endpoint handling)
+
 ~~~java
-@PostMapping("/api/auth/google")
-public ResponseEntity<AuthResponse> loginWithGoogle(@RequestBody FirebaseSignInRequest request) {
-    return ResponseEntity.ok(authService.loginOrRegisterWithFirebase(request.getIdToken()));
-}
+    @PostMapping("/google")
+    public ResponseEntity<?> loginWithGoogle(@RequestBody GoogleSignInRequest request) {
+        try {
+            LoginResponse response = authService.loginOrRegisterWithGoogle(request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid Google token");
+        }
+    }
 
-@PostMapping("/api/auth/facebook")
-public ResponseEntity<AuthResponse> loginWithFacebook(@RequestBody FirebaseSignInRequest request) {
-    return ResponseEntity.ok(authService.loginOrRegisterWithFirebase(request.getIdToken()));
+    @PostMapping("/facebook")
+    public ResponseEntity<?> loginWithFacebook(@RequestBody FacebookSignInRequest request) {
+        try {
+            LoginResponse response = authService.loginOrRegisterWithFacebook(request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid Facebook token");
+        }
+    }
+~~~
+
+Firebase tokens are verified server-side using public keys provided by Google:
+
+**Java** – `FirebaseTokenVerifier` (Spring Boot backend FirebaseTokenVerifier)
+
+~~~java
+public Map<String, Object> verify(String idToken) {
+    SignedJWT signedJWT = SignedJWT.parse(idToken);
+    var claims = jwtProcessor.process(signedJWT, null);
+
+    boolean validIssuer = ISSUER.equals(claims.getIssuer());
+    boolean validAudience = claims.getAudience().contains(EXPECTED_AUDIENCE);
+
+    if (!validIssuer || !validAudience) {
+        throw new IllegalArgumentException("Invalid Firebase token: issuer or audience mismatch");
+    }
+
+    return new ObjectMapper().convertValue(
+        claims.getClaims(),
+        new TypeReference<Map<String, Object>>() {}
+    );
 }
 ~~~
 
-Token verification is handled either using the Firebase Admin SDK:
+This ensures the token was issued by Firebase, matches the expected project, and has not been tampered with.
 
 ~~~java
-FirebaseToken decoded = FirebaseAuth.getInstance().verifyIdToken(firebaseToken);
-~~~
+public Map<String, Object> verify(String idToken) {
+    SignedJWT signedJWT = SignedJWT.parse(idToken);
+    var claims = jwtProcessor.process(signedJWT, null);
 
-Or through a manual verifier (see Appendix [X] for implementation using `SignedJWT` and `jwtProcessor`).
+    boolean validIssuer = ISSUER.equals(claims.getIssuer());
+    boolean validAudience = claims.getAudience().contains(EXPECTED_AUDIENCE);
 
-Once verified, the backend normalizes the user account and returns a secure JWT:
+    if (!validIssuer || !validAudience) {
+        throw new IllegalArgumentException("Invalid Firebase token: issuer or audience mismatch");
+    }
 
-~~~java
-public AuthResponse loginOrRegisterWithFirebase(String firebaseToken) {
-    FirebaseToken decoded = firebaseTokenVerifier.verify(firebaseToken);
-    String email = decoded.getEmail();
-    // create or fetch user logic
-    String jwt = jwtService.generateToken(user);
-    return new AuthResponse(jwt, user.getName(), user.getId());
+    return new ObjectMapper().convertValue(
+        claims.getClaims(),
+        new TypeReference<Map<String, Object>>() {}
+    );
 }
 ~~~
 
-This unified flow is used for all Firebase-based platforms and simplifies backend logic regardless of the provider.
+This ensures the token was issued by Firebase, matches the expected project, and has not been tampered with.
 
----
+**Java** – `AuthService` (Spring Boot backend AuthService)
+
+The token payload is used to find or create a user, and issue a backend JWT:
+
+~~~java
+public LoginResponse loginOrRegisterWithGoogle(GoogleSignInRequest request) {
+    Map<String, Object> payload = firebaseTokenVerifier.verify(request.getIdToken());
+    return loginOrRegisterWithFirebasePayload(payload, request.getIdToken(), "GOOGLE");
+}
+
+public LoginResponse loginOrRegisterWithFacebook(FacebookSignInRequest request) {
+    Map<String, Object> payload = firebaseTokenVerifier.verify(request.getIdToken());
+    return loginOrRegisterWithFirebasePayload(payload, request.getIdToken(), "FACEBOOK");
+}
+
+private LoginResponse loginOrRegisterWithFirebasePayload(Map<String, Object> payload, String idToken, String platform) {
+    String email = (String) payload.get("email");
+    String name = (String) payload.get("name");
+
+    Optional<User> existingUser = userRepository.findByEmail(email);
+
+    User user = existingUser.map(u -> {
+        u.setOauthToken(idToken);
+        u.setPlatform(platform);
+        return userRepository.save(u);
+    }).orElseGet(() -> {
+        User newUser = User.builder()
+            .name(name)
+            .email(email)
+            .platform(platform)
+            .oauthToken(idToken)
+            .build();
+        return userRepository.save(newUser);
+    });
+
+    String token = jwtService.generateToken(user.getId(), user.getEmail());
+
+    return LoginResponse.builder()
+        .userId(user.getId())
+        .name(user.getName())
+        .email(user.getEmail())
+        .phone(user.getPhone())
+        .token(token)
+        .build();
+}
+~~~
+
+This implementation allows seamless integration of Firebase social login with backend-controlled JWT-based security.
 
 ### Security and Validation Rules
 
@@ -1542,12 +1630,10 @@ The overall architecture is reactive, lightweight, and modular:
 - **AuthInterceptor** [13](#13-authinterceptor) (OkHttp) reads the stored JWT and appends it to every secured request via the `Authorization` header.
 - **NavController** handles screen transitions and navigation arguments.
 
----
-
 ![Flowchart – StateFlow-Driven UI](/documents/images/Figure6.png)  
 _Flowchart: Unidirectional state flow from user input to UI recomposition_
 
-
+---
 
 ###  ViewModel and State Handling
 
@@ -1555,7 +1641,6 @@ The Inclusive Trip Planner uses **ViewModels** to bridge UI elements and backend
 
 This pattern establishes each ViewModel as the single source of truth for its feature’s state.
 
----
 
 #### Purpose and Structure
 
@@ -1568,7 +1653,6 @@ Every feature in the app (e.g., itineraries, reviews, users) is backed by a dedi
 
 There is no intermediate repository layer — ViewModels **directly access Retrofit APIs** provided by `RetrofitClient`. This simplifies the data flow and avoids unnecessary abstraction for a project of this size.
 
----
 
 #### State Management with StateFlow
 
@@ -1586,7 +1670,6 @@ Most ViewModels also declare:
 - `_isLoading`: a boolean flag for showing progress indicators
 - `_error`: a nullable string for user-facing error messages
 
----
 
 #### Lifecycle Awareness
 
@@ -1605,7 +1688,6 @@ viewModelScope.launch {
 
 ViewModels are initialized at screen load and persist across recompositions and configuration changes.
 
----
 
 #### Reactive UI Consumption
 
@@ -1634,7 +1716,6 @@ This structure keeps data flow unidirectional and tightly scoped, minimizing UI 
 
 They all follow a shared internal pattern: exposing core data, loading, and error states, with default values initialized inside `init { ... }`.
 
----
 
 #### Error and Result Handling
 
@@ -1656,7 +1737,6 @@ This approach keeps the UI responsive and up-to-date without requiring refreshes
 
 All backend communication in the Inclusive Trip Planner is handled via **Retrofit**, a type-safe HTTP client for Android. The app defines a set of interfaces (e.g., `ItineraryApi`, `ReviewApi`, `SavedItineraryApi`) that map directly to backend endpoints. These interfaces follow standard RESTful conventions, using annotations like `@GET`, `@POST`, `@DELETE`, and `@Path`.
 
----
 
 #### RetrofitClient Initialization
 
@@ -1688,7 +1768,6 @@ object RetrofitClient {
 
 This pattern simplifies endpoint access and avoids boilerplate across ViewModels. Each API interface is exposed as a singleton property and injected directly into ViewModels when needed.
 
----
 
 #### Authorization with Interceptor
 
@@ -1716,7 +1795,6 @@ class AuthInterceptor(private val context: Context) : Interceptor {
 
 This approach ensures consistent authentication across all API calls, without requiring each ViewModel to manually attach tokens.
 
----
 
 #### Request and Response Models
 
@@ -1724,7 +1802,6 @@ Each API uses distinct DTOs for request and response operations. For example, cr
 
 This separation keeps the contract between frontend and backend clear and avoids coupling UI state to transport structures.
 
----
 
 #### No Dynamic Base URL or Environment Switching
 
@@ -1741,8 +1818,6 @@ private val retrofit = Retrofit.Builder()
 ```
 
 In future iterations, this could be extended with BuildConfig flags or flavor-specific injection to support deployment environments.
-
----
 
 #### Localized Error Handling
 
@@ -1766,11 +1841,12 @@ This approach simplifies the flow while still providing users with meaningful fe
 
 This integration strategy offers a good balance of modularity and speed. While more advanced concerns like environment configuration, GraphQL, or centralized error transformation are deferred, the current setup fully supports the needs of a clean and maintainable MVP.
 
+---
+
 ### Data Transfer Objects (DTOs)
 
 The Inclusive Trip Planner uses **Data Transfer Objects (DTOs)** to structure all communication between the frontend and the backend. These objects define the shape of the data expected by or returned from the server, ensuring clarity, consistency, and type safety across API boundaries.
 
----
 
 #### Purpose and Design
 
@@ -1783,7 +1859,6 @@ They are not concerned with UI behavior, navigation, or state — their only rol
 
 This strict separation reduces coupling and allows the frontend to evolve independently from the backend.
 
----
 
 #### Examples of DTOs
 
@@ -1825,7 +1900,6 @@ data class AuthResponse(
 
 This separation ensures that backend-facing logic is kept lightweight and stable, while UI-specific formatting and logic are handled elsewhere.
 
----
 
 #### DTO Simplicity and Usage
 
@@ -1841,7 +1915,6 @@ UI models (separate from DTOs) are not used at this stage to avoid duplication. 
 
 These transformations are minimal and remain inside the ViewModel. No dedicated UI model layer is currently defined.
 
----
 
 #### Flow of Data in the App
 
@@ -1855,7 +1928,6 @@ Data flows through DTOs in the following way:
 
 ViewModels may transform DTOs into UI-friendly representations if needed, but in most cases, the DTOs are used directly.
 
----
 
 #### Future Considerations
 
@@ -1873,7 +1945,6 @@ For the current MVP, however, DTOs remain simple and sufficient.
 
 The Inclusive Trip Planner app uses **Jetpack Compose Navigation** to define screen transitions and handle route parameters. Navigation is declared centrally within `MainActivity`, where a single `NavController` governs the entire application flow. This approach enables clean separation of screens, consistent state management, and easy handling of route arguments.
 
----
 
 #### Navigation Setup in MainActivity
 
@@ -1901,7 +1972,6 @@ NavHost(
 
 This graph includes both simple routes (e.g., `"search"`, `"settings"`) and nested flows using `navigation()` blocks (e.g., `"signup_flow"`).
 
----
 
 #### Parameterized Routes and Navigation Arguments
 
@@ -1919,7 +1989,6 @@ composable(
 
 This allows the app to pass dynamic information (like itinerary IDs) between screens without relying on global state. At this stage, the app does **not** use `SavedStateHandle` or deep links — choices that can be revisited later as the app scales.
 
----
 
 #### ViewModel Lifecycle and Sharing
 
@@ -1931,7 +2000,6 @@ ViewModels are scoped appropriately across the app:
 
 This hybrid approach keeps memory use efficient while allowing shared access where it makes sense.
 
----
 
 #### Post-Login Routing and Manual Control
 
@@ -1947,7 +2015,6 @@ This clears the back stack and prevents returning to authentication flows after 
 
 This approach also ensures backstack cleanliness — users are not able to navigate back into the login flow after authentication, reinforcing expected navigation behavior.
 
----
 
 #### Future Considerations
 
@@ -1957,19 +2024,19 @@ While the current navigation setup fully supports the needs of an MVP, future im
 - **SavedStateHandle**: Restoring ViewModel state after process death or configuration changes
 - **Modular Navigation Graphs**: Splitting routes by feature (e.g., `itineraries_graph`, `profile_graph`) for scalability
 
----
-
 This structure prioritizes simplicity, clarity, and MVP readiness. Screens remain easy to reason about, ViewModels stay consistent, and navigation remains flexible enough to grow as the app evolves.
+
+---
 
 # 10 Demonstration of the project
 
 For the demonstration we will use a controlled environment that will let us showcase the capacities and real applications of the Inclusive Trip Planner.
 
-### 10.1 Setup and Execution Environment
+## 10.1 Setup and Execution Environment
 
 The demonstration of the Inclusive Trip Planner prototype was carried out in a controlled local environment that replicates real-world usage conditions. This section summarizes the setup used for the frontend and backend during testing. All technical components and configurations mentioned here have already been described in detail in **Section 8.2**, **Section 8.3**, and **Section 9.1**.
 
-#### Frontend Environment
+### Frontend Environment
 
 The mobile application was executed using the Android Emulator in Android Studio. The device emulated was a **Pixel 5 running Android 13 (API level 33)**, matching the setup previously documented. The app was launched directly from within the IDE, using a predefined test user with:
 
@@ -1981,7 +2048,7 @@ All HTTP requests were secured via the `AuthInterceptor`, which appended the `Au
 
 ![Screenshots. Emulator](/documents/images/Emulator.png)
 
-#### Backend Environment
+### Backend Environment
 
 The backend ran as a **Docker containerized Spring Boot application** on the loopback address `http://10.0.2.2:8080`, used by Android emulators to access the host. A second container hosted the PostgreSQL database. The schema and demo data were automatically loaded via **Liquibase changelogs**, as previously explained in **Section 9.1**.
 
@@ -1997,10 +2064,11 @@ This configuration enabled full feature access during the demonstration, without
 
 ![Screenshots. DBeaver](/documents/images/Dbeaver1.png)
 
-
 This environment mirrors the intended production deployment structure, offering consistency, reproducibility, and fast iteration.
 
-### 10.2 Demonstration Objectives
+---
+
+## 10.2 Demonstration Objectives
 
 The objective of this demonstration is to validate the core functionality of the Inclusive Trip Planner by executing key user flows in a controlled environment. These flows were selected based on their technical relevance and their role in shaping the overall user experience. The demonstration relies on a predefined test user, whose data was inserted into the database in advance, including accessibility preferences, saved itineraries, and previously submitted reviews.
 
@@ -2012,21 +2080,21 @@ The goals of the demonstration are as follows:
 - **Save and un-save itineraries**, triggering backend updates and reflecting changes in the frontend UI.
 - **Validate UI responsiveness**, including loading states, error handling, and dynamic updates during navigation.
 
-These objectives are representative of the most important technical flows in the current implementation. Features such as review posting, accessibility tagging, or user profile updates may also be briefly illustrated if time and space allow, but they are not the primary focus of this thesis demonstration.
-
-### 10.3 Execution Flow and Screens
-
-This section presents a step-by-step walkthrough of the main application screens and usage flows, as experienced by a user interacting with the Inclusive Trip Planner. Each subsection highlights key functionality, backend interaction, and visual elements. The walkthrough is based on the current MVP state, with all features tested and functioning as expected.
+These objectives are representative of the most important technical flows in the current implementation. Features such as review posting, accessibility tagging, or user profile updates will also be briefly illustrated, but they are not the primary focus of this demonstration.
 
 ---
 
-#### App Launch and Authentication
+## 10.3 Execution Flow and Screens
+
+This section presents a step-by-step walkthrough of the main application screens and usage flows, as experienced by a user interacting with the Inclusive Trip Planner. Each subsection highlights key functionality, backend interaction, and visual elements. The walkthrough is based on the current MVP state, with all features tested and functioning as expected.
+
+### App Launch and Authentication
 
 When the Inclusive Trip Planner app is launched, users are first presented with the **WelcomeScreen**, which serves as the authentication entry point. From this screen, users can log in using their **email address**, **phone number**, or one of the available **social login options** (Google or Facebook).
 
 ![Screenshots. WelcomeScreen](/documents/images/WelcomeScreen.png)
 
-##### Login via Email or Phone
+#### Login via Email or Phone
 
 Upon selecting an input method:
 
@@ -2042,20 +2110,20 @@ This logic ensures a consistent and secure login experience. The app dynamically
 
 All authentication-related screens are reactive and connected to the backend for identity validation. The JWT received after successful login is stored securely and reused for subsequent requests, as previously described in **Section 9.5**.
 
-### 10.3.2 Signup Flow
+### Signup Flow
 
 The Inclusive Trip Planner does not use a separate “Sign up” button. Instead, the signup flow is triggered automatically when a user attempts to log in with an email or phone number that does not yet exist in the system. This dynamic entry point streamlines the onboarding process while preserving backend consistency for login flows.
 
 Once an unregistered identifier is entered, the app redirects to a placeholder **OTPVerificationScreen**, which in future deployments will handle real verification logic. From there, the user is guided through a structured series of screens to create their profile and define preferences.
 
-#### SignUpNameScreen
+### SignUpNameScreen
 
 The first step prompts the user to enter their full name and an optional nickname. This data is stored and used across the app for personalization purposes.
 
 ![Screenshots. SignUpNameScreen](/documents/images/SignUpNameScreen.png)
 
 
-#### SignUpEmailScreen / SignUpPhoneScreen
+### SignUpEmailScreen / SignUpPhoneScreen
 
 Depending on which contact method was missing during the initial login attempt, the app now collects the complementary identifier (e.g., phone if email was given, or vice versa). This ensures that each user has a complete set of contact information.
 
@@ -2064,13 +2132,13 @@ Depending on which contact method was missing during the initial login attempt, 
 ![Screenshots. SignUpEmailScreen](/documents/images/SignUpEmailScreen.png)
 
 
-#### SignUpPasswordScreen
+### SignUpPasswordScreen
 
 In this step, the user defines a password, which will be securely hashed before being stored in the backend. The password is later used to authenticate future logins.
 
 ![Screenshots. SignUpPasswordScreen](/documents/images/SignUpPasswordScreen.png)
 
-#### SignUpAccessibilityScreen
+### SignUpAccessibilityScreen
 
 This screen presents the user with a list of accessibility features retrieved dynamically from the backend. The app fetches all available entries from the `/api/accessibility-features` endpoint and displays them as selectable chips.
 
@@ -2078,13 +2146,13 @@ Selected features are stored in the `user_accessibility_features` table and will
 
 ![Screenshots. SignUpAccessibilityScreen](/documents/images/SignUpAccessibilityScreen.png)
 
-#### SignUpCountriesScreen
+### SignUpCountriesScreen
 
 In the final step, the user selects the countries they plan to travel to. As with the previous screen, the list of available countries is fetched from the backend. The selections are persisted in the `user_country_access` table, determining which destinations are visible to the user.
 
 ![Screenshots. SignUpCountriesScreen](/documents/images/SignUpCountriesScreen.png)
 
-#### Backend Integration
+### Backend Integration
 
 During the signup process, multiple backend calls are made to:
 
@@ -2094,11 +2162,11 @@ During the signup process, multiple backend calls are made to:
 
 All steps are integrated with the backend through Retrofit, with proper validation and error handling in place. The data collected during signup directly shapes the personalized experience offered throughout the app.
 
-### 10.3.3 Home Screen and Itinerary Access
+### Home Screen and Itinerary Access
 
 After a successful login, users are directed to the **Home Screen**, which serves as the central hub for accessing their saved trips and browsing all available itineraries. This screen plays a crucial role in the user journey, combining personalized information with real-time data loading. From a technical standpoint, it connects to multiple backend endpoints and relies on `ViewModel` state observation to render content dynamically.
 
-#### Next Plan Section
+### Next Plan Section
 
 At the top of the Home Screen, the app highlights the user’s **Next Plan**, which is the itinerary they have most recently marked as their upcoming trip. This feature is designed to provide immediate access to the itinerary the user intends to follow next.
 
@@ -2114,8 +2182,9 @@ Each itinerary card includes:
 - Title of the itinerary
 - Target destination
 - Duration and estimated price
+- People assisting the itinerary
 - Average rating
-- Icons for relevant accessibility features (if present)
+- Icons for relevant accessibility features
 
 This structure allows users to quickly assess and compare itineraries before choosing one to explore in detail.
 
@@ -2138,7 +2207,7 @@ Each request includes the JWT stored on the device, added automatically via the 
 
 This screen is a core part of the Inclusive Trip Planner experience and demonstrates successful frontend-backend integration, reactive UI architecture, and token-secured content loading.
 
-### 10.3.4 Itinerary Details
+### Itinerary Details
 
 Once an itinerary is selected from the Home Screen, the user is directed to the **ItineraryDetailsScreen**, where full information about the trip is displayed. This screen retrieves and renders data using the itinerary’s unique identifier, passed via navigation.
 
@@ -2146,6 +2215,7 @@ The screen includes:
 
 - The **itinerary title**, **description**, **duration**, and **price**
 - A list of **accessibility features** such as "wheelchair access" or "braille signage"
+- A button to access the detailed **itinerary steps** (see section **Itinerary Steps**).
 - A **LazyColumn** displaying **user reviews**, fetched from the backend and sorted by creation date
 - Two primary interaction buttons:
   - **Save/Unsave**: Toggles the itinerary’s saved state, calling a backend endpoint to persist the change
@@ -2153,12 +2223,12 @@ The screen includes:
 
 The interface responds dynamically to network and state changes using the associated `ItineraryViewModel`, which manages asynchronous data loading and exposes all content through a reactive `StateFlow`. Visual elements, including cards and icon buttons, are implemented in Jetpack Compose.
 
-At the bottom of the screen, the user can also navigate to write a new review or to access the detailed itinerary steps (see **Section 10.3.5**).
+At the bottom of the screen, the user can also navigate to write a new review.
 
 ![Screenshots. ItineraryDetails](/documents/images/ItineraryDetails.png)
 
 
-### 10.3.5 Itinerary Steps
+### Itinerary Steps
 
 After accessing an itinerary’s details, users can tap a dedicated button to view the sequence of stops that make up the selected trip. This opens the **ItineraryStepsScreen**, which presents both a geographic and descriptive breakdown of the itinerary in a clear, structured layout.
 
@@ -2190,7 +2260,7 @@ Geographic markers are built using the step coordinates (latitude and longitude)
 
 This screen reinforces the structure and clarity of the travel experience, especially for users relying on precise location-based cues.
 
-### 10.3.6 Review Submission
+### Review Submission
 
 The Inclusive Trip Planner allows users to share their feedback on each itinerary by submitting a review. These reviews help future users evaluate trip quality and accessibility, while also serving as a form of engagement and content enrichment. The review system supports both textual and star-based input, with the option to post anonymously.
 
@@ -2257,7 +2327,39 @@ Any failed requests result in user-facing error messages. On success, the review
 
 This feature completes the feedback loop in the itinerary flow and provides meaningful context for future users evaluating a trip.
 
-### 10.3.7 Saved Itineraries
+### Search Screen
+
+The **SearchScreen** allows users to actively look for itineraries based on keywords, date range, and accessibility criteria. Unlike the Home Screen, which passively displays all available itineraries, the Search screen provides tools for focused exploration, especially when planning around specific destinations or accessibility needs.
+
+The interface is composed of three key elements:
+
+- A **search bar** where users can type a destination name.
+- A **date range selector**, pre-filled with a one-week range starting from the current date.
+- An **accessibility filter**, offering options such as “Wheelchair Accessible”, “Braille Available”, or “Hearing Aid”.
+
+Once users enter a search term and optionally apply filters, they can initiate the query by pressing the search icon. This triggers the display of matching itineraries in a vertically scrollable list.
+
+![Screenshots. SearchScreen](/documents/images/SearchScreen.png)
+
+#### Itinerary Display
+
+Each itinerary is displayed using the same card layout as the Home Screen and Saved Itineraries, maintaining design consistency. Cards show key details such as:
+
+- **Title**
+- **Accessibility icons**
+- **Duration**
+- **People supported**
+- **Rating and price**
+
+#### Backend Integration
+
+Search results are dynamically filtered in-memory from the full list of itineraries previously fetched via the `ItineraryViewModel`. Filtering logic checks for partial matches in the itinerary title or destination name and then applies the selected accessibility filter if any. This lightweight approach is responsive and sufficient for the current demo dataset.
+
+If no search has been triggered yet, the screen displays a friendly placeholder message prompting the user to begin a search. Likewise, if no results match the query, the app can optionally show an empty state.
+
+![Screenshots. SearchScreenPlaceholder](/documents/images/SearchScreenPlaceholder.png)
+
+### Saved Itineraries
 
 In addition to browsing and reviewing itineraries, users of the Inclusive Trip Planner can save specific trips for later reference. This bookmarking functionality adds flexibility to the planning process by allowing users to maintain a personalized list of trips they are interested in, independently of their current navigation session.
 
@@ -2269,18 +2371,13 @@ These interactions trigger secure API requests to the backend and update the loc
 
 ![Screenshots. SaveButton](/documents/images/SaveButton.png)
 
-#### SavedItinerariesScreen
+### SavedItinerariesScreen
 
-All bookmarked itineraries are displayed in the **SavedItinerariesScreen**, which serves as a personal archive. This screen uses a vertical scrollable list of cards, each presenting key information about the saved trip, such as:
-
-- Title and destination
-- Accessibility features
-- Duration, rating, and price
-- Visual thumbnail if available
+All bookmarked itineraries are displayed in the **SavedItinerariesScreen**, which serves as a personal archive. This screen uses a vertical scrollable list of cards, each presenting key information about the saved itinerary such as the home screen cards did.
 
 ![Screenshots. SavedItineraries](/documents/images/SavedItinerariesScreen.png)
 
-This screen is built using Jetpack Compose and is backed by the `SavedItinerariesViewModel`, which handles state updates and synchronization with the backend.
+This screen is backed by the `SavedItinerariesViewModel`, which handles state updates and synchronization with the backend.
 
 #### Backend Integration
 
@@ -2301,9 +2398,7 @@ If the user has no saved itineraries, the screen displays a placeholder message 
 
 >![Screenshots. SavedItinirerariesMissing](/documents/images/SavedItinerariesEmpty.png)
 
-This feature reinforces user control over their planning process and supports asynchronous exploration, allowing itineraries to be marked and revisited across sessions.
-
-### 10.3.9 Profile Screen
+### Profile Screen
 
 The **ProfileScreen** provides a centralized view of the user's identity, preferences, and activity within the Inclusive Trip Planner. It consolidates personal information, accessibility features, and navigation shortcuts, offering both an overview and a starting point for deeper interaction.
 
@@ -2334,7 +2429,7 @@ This ensures the content remains consistent with the user's profile as stored in
 
 The screen is fully scrollable and responsive, ensuring a smooth user experience even on smaller devices. The design reinforces clarity and consistency, aligning with the accessibility-first principles of the app.
 
-### 10.4 Visual Feedback and Responsiveness
+## 10.4 Visual Feedback and Responsiveness
 
 This section illustrates how the Inclusive Trip Planner communicates state changes, errors, and successful interactions to the user. Rather than focusing on underlying implementation details—already covered in Section 9—this part showcases the actual **visual behavior** experienced during the demonstration. The aim is to highlight how the app provides clarity, confidence, and smooth interaction through loading indicators, fallback states, and responsive UI updates.
 
@@ -2378,9 +2473,12 @@ Compared to earlier versions, the current interface has been refined to improve 
 
 These improvements were made iteratively during development and directly enhance the user experience.
 
+**Before – Original Chip Layout (no spacing, no wrapping)**  
 ![Screenshots. Chips](/documents/images/OldChips.png)
 
+**After – Improved Chip Layout with FlowRow and Padding**  
 ![Screenshots. Chips](/documents/images/NewChips.png)
+
 #### Accessibility Considerations
 
 Special attention was given to the **readability and spacing** of interface elements related to accessibility. In the onboarding flow, each chip has a large enough touch target, with high-contrast labels and intuitive toggling behavior. Even when users select many options, the layout remains functional, though it can become visually dense with excessive selections.
@@ -2391,9 +2489,9 @@ Accessibility indicators on itinerary cards and detail screens also follow clear
 
 #### Conclusion
 
-The Inclusive Trip Planner MVP demonstrates a consistent and user-friendly approach to visual feedback. From loading indicators to dynamic UI updates and fallback states, each aspect of the interface contributes to a smooth and predictable experience. These qualities, while subtle, are essential to the app’s overall accessibility and polish—even at this early stage of development.
+The Inclusive Trip Planner MVP demonstrates a user-friendly approach to visual feedback. From loading indicators to dynamic UI updates and fallback states, each aspect of the interface contributes to a smooth and predictable experience. These qualities where prioritized to ensure the app’s overall accessibility and polish—even at this early stage of development.
 
-### 10.5.1 Database State Verification
+## 10.5 Database State Verification
 
 To ensure that frontend interactions were correctly persisted, each user-triggered action during the demonstration was verified directly against the backend database using DBeaver. This process served to confirm that operations such as saving itineraries and submitting reviews resulted in real, observable changes in the system’s state.
 
@@ -2419,7 +2517,7 @@ This step validated not only the correct functioning of the review submission fl
 
 Both of these checks confirmed that frontend actions were properly stored and persisted in the backend, using actual database queries rather than relying solely on frontend state or API responses.
 
-### 10.5.2 API Activity and Logging
+### API Activity and Logging
 
 During the demonstration, backend API activity was continuously monitored to validate request execution and ensure that all user actions triggered the appropriate server-side behavior. Two sources of logging were used for this purpose: the **Android Logcat** and the **Spring Boot console output**.
 
@@ -2452,7 +2550,7 @@ In cases where requests lacked a valid JWT or used an expired token, the backend
 
 This multi-level monitoring provided a complete picture of API behavior and ensured that all frontend actions were effectively translated into backend operations, with clear feedback in both success and failure cases.
 
-### 10.5.3 Error Feedback Confirmation
+### Error Feedback Confirmation
 
 To verify the robustness and transparency of the Inclusive Trip Planner, a set of intentional backend failures were triggered during the demonstration. These tests aimed to ensure that the system gracefully handled error conditions and provided informative feedback to both developers and end users.
 
@@ -2485,7 +2583,7 @@ To test input validation, a review submission was attempted with a missing ratin
 
 These scenarios verified that validation logic, error propagation, and frontend messaging were all functioning as intended. The application remained responsive and stable throughout, with no unexpected behavior during any of the induced failure states.
 
-### 10.5.4 Summary of API Observability
+### Summary of API Observability
 
 The demonstration of the Inclusive Trip Planner emphasizes not only the visual behavior of the application, but also the traceability of each core interaction. Every user action—whether submitting a review, saving an itinerary, or logging in—triggers a corresponding backend event, making the relationship between the frontend and backend both **transparent and verifiable**.
 
@@ -2508,7 +2606,7 @@ The system provides observability across three distinct layers:
 
 This level of transparency confirms that the prototype operates as a fully functional MVP rather than a scripted or simulated demo. Each step in the demonstration produced measurable backend effects, strengthening confidence in the system’s architecture, integration, and correctness.
 
-### 10.6 Summary and Next Steps
+## 10.6 Summary and Next Steps
 
 This final section of the demonstration chapter offers a concise reflection on the results presented and outlines the next technical objectives for the Inclusive Trip Planner prototype. The demonstration successfully confirmed that the system performs all intended user flows under realistic conditions, and that every core feature—authentication, itinerary exploration, review submission, and trip saving—produces verifiable backend effects.
 
@@ -2536,7 +2634,7 @@ The system architecture—composed of a Kotlin-based Android frontend and a Spri
 
 Overall, the prototype confirms the technical feasibility of an accessible trip-planning application and lays a strong foundation for future iterations, including advanced personalization and large-scale deployment.
 
-### 11.2 Implications of the Results
+## 11.2 Implications of the Results
 
 The results of this project highlight both the need and the potential for inclusive design in digital travel applications. By placing accessibility at the core of the experience—rather than treating it as an afterthought—the Inclusive Trip Planner prototype demonstrates that personalization and equity can be embedded into every step of the user journey.
 
@@ -2544,53 +2642,49 @@ From a technical standpoint, the successful integration of features such as acce
 
 Furthermore, this thesis illustrates that accessibility-driven logic can be incrementally introduced into existing applications. Even though the current version does not yet support dynamic filtering or live itinerary adaptation, the architecture anticipates these features and has been designed to support them in future releases.
 
-In a broader sense, this project affirms that inclusive design is not only technically achievable—it is also a meaningful differentiator. Travel applications that consider diverse needs are better equipped to serve wider audiences, including elderly users, people with visual or motor impairments, and travelers with language or navigation challenges.
-
-By validating these ideas through a working prototype, this thesis contributes to the growing recognition that accessibility is not a constraint, but an opportunity to improve usability, engagement, and societal impact in mobile application development.
-
-### 11.3 Limitations
+## 11.3 Limitations
 
 While the Inclusive Trip Planner demonstrates a fully functional and testable MVP, several limitations remain in both scope and implementation that should be acknowledged for a balanced evaluation.
 
-#### Static Itinerary Content
+### Static Itinerary Content
 
 The most notable limitation is the lack of dynamic itinerary generation. All itineraries are currently **predefined and hardcoded** in the database, meaning that the application does not yet offer personalized trip suggestions based on user preferences or constraints. Although accessibility filters were collected during signup, they are not yet used to filter or prioritize itineraries in the frontend.
 
-#### Limited Accessibility Logic
+### Limited Accessibility Logic
 
 While the app collects and stores accessibility features and links them to itineraries, the **logic for filtering or adapting content** based on these features is not implemented in the current version. For example, users with motor impairments are not yet offered tailored navigation steps or filtered activity lists. This results in a gap between data collection and actionable user experience.
 
-#### Authentication Flow Gaps
+### Authentication Flow Gaps
 
 Although login via email, password, and Google/Facebook are implemented and functional, the **OTP verification flow remains a placeholder**. This means that phone-only signups cannot yet be completed without manual backend entry or test data preparation. This limitation affects the onboarding of first-time users and will need to be addressed in a production deployment.
 
-#### No Offline or Cache Mode
+### No Offline or Cache Mode
 
 The current app requires a **continuous internet connection** to function properly. It does not cache itineraries, reviews, or user data for offline use, which limits its utility in real-world travel scenarios where connectivity may be limited or intermittent.
 
-#### MVP Constraints
+### MVP Constraints
 
-By design, the system reflects a **minimum viable product** focused on technical integration and core flows. Features such as itinerary search, user notifications, settings customization, or real-time itinerary updates are either stubbed or excluded from this version. These omissions are not oversights but conscious trade-offs to prioritize stability and technical clarity for demonstration purposes.
+By design, the system reflects a **minimum viable product** focused on technical integration and core flows. Features such as user notifications, settings customization, or real-time itinerary updates are either stubbed or excluded from this version. These omissions are not oversights but conscious trade-offs to prioritize stability and technical clarity for demonstration purposes.
 
 ---
 
 Despite these limitations, the core workflows—authentication, itinerary viewing, saving, and reviewing—are complete, functional, and consistent. They lay a strong foundation for future iterations that could introduce the missing features without significant architectural changes.
 
-### 11.4 Future Work
+## 11.4 Future Work
 
 The development of the Inclusive Trip Planner MVP has laid a strong foundation for a personalized, accessibility-focused travel experience. Based on the current implementation and its known limitations, several clear avenues for future work have been identified to enhance functionality, scalability, and inclusivity.
 
-#### 1. Personalized Itinerary Recommendations
+### 1. Personalized Itinerary Recommendations
 
 One of the most impactful future improvements is the integration of **personalized itinerary filtering** based on users' selected accessibility features. This would involve:
 
 - Updating backend queries to prioritize itineraries matching user needs.
 - Introducing filters in the frontend to adjust the list dynamically.
-- Designing new screens or components that visually indicate suitability for the user.
+- Designing new screens or compoents that visually indicate suitability for the user.
 
 This personalization logic is already anticipated in the data model, requiring only logic implementation and UI enhancements to activate.
 
-#### 2. OTP Verification and Full Phone Signup Support
+### 2. OTP Verification and Full Phone Signup Support
 
 To complete the user onboarding flow, the **OTPVerificationScreen** must be connected to an actual SMS verification backend (e.g., Firebase or Twilio). This would allow:
 
@@ -2600,7 +2694,7 @@ To complete the user onboarding flow, the **OTPVerificationScreen** must be conn
 
 This improvement would close one of the last gaps in the authentication process.
 
-#### 3. Offline Access and Smart Caching
+### 3. Offline Access and Smart Caching
 
 Given the nature of travel, the app should provide **offline capabilities** such as:
 
@@ -2610,7 +2704,7 @@ Given the nature of travel, the app should provide **offline capabilities** such
 
 This would greatly increase the reliability and practicality of the application for real-world use.
 
-#### 4. Accessibility-Specific Enhancements
+### 4. Accessibility-Specific Enhancements
 
 In addition to basic accessibility metadata, future versions of the app could introduce:
 
@@ -2620,7 +2714,7 @@ In addition to basic accessibility metadata, future versions of the app could in
 
 Such features would extend the app’s usability to a broader audience and align it with WCAG recommendations.
 
-#### 5. Admin Interface and Content Expansion
+### 5. Admin Interface and Content Expansion
 
 To scale itinerary management, an **admin dashboard** could be introduced to:
 
@@ -2630,7 +2724,7 @@ To scale itinerary management, an **admin dashboard** could be introduced to:
 
 Additionally, expanding the dataset to support multiple countries, cities, and languages would allow the app to serve a truly global audience.
 
-#### 6. Deployment and User Testing
+### 6. Deployment and User Testing
 
 While the current system runs locally, production readiness would involve:
 
@@ -2644,7 +2738,7 @@ These steps would transform the MVP into a usable public release, with continuou
 
 Future work will focus on transforming the Inclusive Trip Planner from a strong proof-of-concept into a scalable, user-centric platform capable of supporting a wide range of travelers and accessibility needs.
 
-### 11.5 Final Words
+## 11.5 Final Words
 
 The Inclusive Trip Planner project has been an opportunity to explore the intersection between travel, accessibility, and modern mobile development. From its initial conception to the delivery of a fully functioning MVP, the project has evolved into a tangible demonstration of how technology can empower underrepresented users in the travel space.
 
@@ -2652,7 +2746,7 @@ Through the implementation of authentication, accessibility preference managemen
 
 While this version is still an early prototype, it is technically solid and offers a clear roadmap for future improvements. More importantly, it highlights the value of inclusive design—not as an afterthought, but as a core principle guiding both functionality and user experience.
 
-This thesis marks the end of the current development cycle, but not the end of the journey. With the foundational work now complete, the next steps involve scaling, testing, and iterating based on real feedback. The Inclusive Trip Planner is not just a school project—it is a launchpad for something bigger.
+This thesis marks the end of the current development cycle, but not the end of the journey. With the foundational work now complete, the next steps involve scaling, testing, and iterating based on real feedback.
 
 ## Appendix
 
